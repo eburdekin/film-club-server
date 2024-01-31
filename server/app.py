@@ -3,6 +3,7 @@
 from flask import Flask, jsonify, request, make_response
 from flask_migrate import Migrate
 from flask_restful import Api, Resource
+from flask_cors import CORS
 
 # from flask_jwt_extended import JWTManager, jwt_required, create_access_token
 
@@ -17,6 +18,7 @@ migrate = Migrate(app, db)
 db.init_app(app)
 
 api = Api(app)
+CORS(app)
 
 
 @app.route("/")
