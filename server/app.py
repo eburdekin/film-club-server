@@ -4,6 +4,8 @@ from flask import Flask, jsonify, request, make_response
 from flask_migrate import Migrate
 from flask_restful import Api, Resource
 
+# from flask_jwt_extended import JWTManager, jwt_required, create_access_token
+
 from models import db, User, Movie, Club, ScreeningRoom, Post, Rating
 
 app = Flask(__name__)
@@ -20,6 +22,14 @@ api = Api(app)
 @app.route("/")
 def index():
     return "<h1>Film Club Server</h1>"
+
+
+# @app.before_request
+# def check_if_logged_in():
+#     open_access_list = ["movies", "clubs", "screening_rooms"]
+
+#     if (request.endpoint) not in open_access_list and (not session.get("user_id")):
+#         return {"error": "401 Unauthorized"}, 401
 
 
 class Users(Resource):
@@ -44,6 +54,10 @@ class Clubs(Resource):
     def get(self):
         clubs = [club.to_dict() for club in Club.query.all()]
         return make_response(jsonify(clubs), 200)
+
+    # @jwt_required
+    # def post(self):
+    #     pass
 
 
 api.add_resource(Clubs, "/clubs")
