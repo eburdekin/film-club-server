@@ -4,7 +4,7 @@ from flask import Flask, jsonify, request, make_response
 from flask_migrate import Migrate
 from flask_restful import Api, Resource
 
-from models import db, User, Movie, Club, ScreeningRoom
+from models import db, User, Movie, Club, ScreeningRoom, Post, Rating
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///filmclub.db"
@@ -57,6 +57,23 @@ class ScreeningRooms(Resource):
 
 api.add_resource(ScreeningRooms, "/screening_rooms")
 
+
+class Posts(Resource):
+    def get(self):
+        posts = [post.to_dict() for post in Post.query.all()]
+        return make_response(jsonify(posts), 200)
+
+
+api.add_resource(Posts, "/posts")
+
+
+class Ratings(Resource):
+    def get(self):
+        ratings = [rating.to_dict() for rating in Rating.query.all()]
+        return make_response(jsonify(ratings), 200)
+
+
+api.add_resource(Ratings, "/ratings")
 
 if __name__ == "__main__":
     app.run(port=5555, debug=True)

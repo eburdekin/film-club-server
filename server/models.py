@@ -20,6 +20,13 @@ class User(db.Model, SerializerMixin):
     profile_picture = db.Column(db.String)
     bio = db.Column(db.String)
 
+    # Define relationship to posts and ratings
+    posts = db.relationship("Post", backref="author", lazy="dynamic")
+
+    ratings = db.relationship("Rating", backref="user", lazy="dynamic")
+
+    serialize_rules = ("-posts.user", "-ratings.user")
+
     # Define relationship to clubs
     # clubs = db.relationship(
     #     "Club", secondary="club_members", backref=db.backref("members", lazy="dynamic")
@@ -129,6 +136,10 @@ class ScreeningRoom(db.Model, SerializerMixin):
 
     # movie = db.relationship("Movie", backref="screening_room")  # Define relationship
 
+    posts = db.relationship("Post", backref="screening_room", lazy="dynamic")
+
+    ratings = db.relationship("Rating", backref="screening_room", lazy="dynamic")
+
     serialize_rules = ("-movie.screening_rooms",)
 
     def __init__(
@@ -143,3 +154,41 @@ class ScreeningRoom(db.Model, SerializerMixin):
 
     def __repr__(self):
         return f"<Screening Room {self.name}, id # {self.id}>"
+
+
+class Post(db.Model, SerializerMixin):
+    __tablename__ = "posts"
+
+    id = db.Column(db.Integer, primary_key=True)
+    content = db.Column(db.String)
+    author_id = db.Column(db.Integer, db.ForeignKey("users.id"))
+    screening_room_id = db.Column(db.Integer, db.ForeignKey("screening_rooms.id"))
+    timestamp = db.Column(db.DateTime, default=db.func.now())
+
+    serialize_only = ("content", "timestamp")
+
+    def __init__(self, content, author_id, screening_room_id):
+        self.content = content
+        self.author_id = author_id
+        self.screening_room_id = screening_room_id
+
+    def __repr__(self):
+        return f"<Post id # {self.id}>"
+
+
+class Rating(db.Model, SerializerMixin):
+    __tablename__ = "ratings"
+
+    id = db.Column(db.Integer, primary_key=True)
+    author_id = db.Column(db.Integer, db.ForeignKey("users.id"))
+    screening_room_id = db.Column(db.Integer, db.ForeignKey("screening_rooms.id"))
+    rating = db.Column(db.Integer)
+    timestamp = db.Column(db.DateTime, default=db.func.now())
+
+    def __init__(self, author_id, screening_room_id, rating):
+        self.author_id = author_id
+        self.screening_room_id = screening_room_id
+        self.rating = rating
+
+    def __repr__(self):
+        return f"<Rating id # {self.id}>"
