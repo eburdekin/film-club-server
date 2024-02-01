@@ -65,6 +65,17 @@ class Clubs(Resource):
 api.add_resource(Clubs, "/clubs")
 
 
+class ClubsById(Resource):
+    def get(self, id):
+        club = Club.query.filter_by(id=id).first()
+        if club is None:
+            return make_response({"error": "Club not found"}, 404)
+        return make_response(club.to_dict(), 200)
+
+
+api.add_resource(ClubsById, "/clubs/<int:id>")
+
+
 class ScreeningRooms(Resource):
     def get(self):
         rooms = [room.to_dict() for room in ScreeningRoom.query.all()]
