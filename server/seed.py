@@ -40,9 +40,12 @@ with app.app_context():
         db.session.add(movie)
 
     print("Seeding film club data...")
-    club1 = Club(name="club1", description="hihihi")
+    club1 = Club(name="Criterion Classics", description="We watch Criterion movies.")
+    club2 = Club(name="Foreign Cinema", description="We love subtitles.")
 
-    db.session.add(club1)
+    clubs = [club1, club2]
+
+    db.session.add_all(clubs)
 
     print("Seeding screening room data...")
     screening_room1 = ScreeningRoom(name="screenroom1", club_id=1, movie_id=1)
