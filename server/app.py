@@ -192,7 +192,10 @@ class ClubsById(Resource):
         club = Club.query.filter_by(id=id).first()
         if club is None:
             return make_response({"error": "Club not found"}, 404)
-        return make_response(club.to_dict(), 200)
+        # return make_response(club.to_dict(), 200)
+        club_schema = ClubSchema()
+        club_data = club_schema.dump(club)
+        return make_response(jsonify(club_data), 200)
 
 
 api.add_resource(ClubsById, "/clubs/<int:id>")
