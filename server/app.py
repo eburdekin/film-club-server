@@ -108,10 +108,26 @@ class PostSchema(ma.SQLAlchemySchema):
 
     id = ma.auto_field()
     content = ma.auto_field()
-    author_id = ma.auto_field()
-    author = fields.Nested("UserSchema", only=("username",))
-    screening_room_id = ma.auto_field()
+    # author_id = ma.auto_field()
+    author = fields.Nested(
+        "UserSchema",
+        only=(
+            "id",
+            "username",
+        ),
+    )
+    # screening_room_id = ma.auto_field()
+    screening_room = fields.Nested(
+        "ScreeningRoomSchema",
+        only=(
+            "id",
+            "name",
+        ),
+    )
     timestamp = ma.auto_field()
+    movie = fields.Nested(
+        "MovieSchema", attribute="screening_room.movie", only=("id", "title")
+    )
 
 
 class RatingSchema(ma.SQLAlchemySchema):
@@ -122,10 +138,26 @@ class RatingSchema(ma.SQLAlchemySchema):
 
     id = ma.auto_field()
     rating = ma.auto_field()
-    author_id = ma.auto_field()
-    author = fields.Nested("UserSchema", only=("username",))
-    screening_room_id = ma.auto_field()
+    # author_id = ma.auto_field()
+    author = fields.Nested(
+        "UserSchema",
+        only=(
+            "id",
+            "username",
+        ),
+    )
+    # screening_room_id = ma.auto_field()
+    screening_room = fields.Nested(
+        "ScreeningRoomSchema",
+        only=(
+            "id",
+            "name",
+        ),
+    )
     timestamp = ma.auto_field()
+    movie = fields.Nested(
+        "MovieSchema", attribute="screening_room.movie", only=("id", "title")
+    )
 
 
 # API Routes
@@ -154,7 +186,14 @@ class Movies(Resource):
         return make_response(jsonify(movies_data), 200)
 
 
-api.add_resource(Movies, "/movies")
+class MoviesById(Resource):
+    def get(self, id):
+        movie = Movie.query.filter_by(id=id).first()
+        if movie is None:
+            return make_response({"error": "Movie not found"}, 404)
+        movie_schema = MovieSchema()
+        movie_data = movie_schema.dump(movie)
+        return make_response(jsonify(movie_data), 200)
 
 
 class Users(Resource):
@@ -167,7 +206,14 @@ class Users(Resource):
         return make_response(jsonify(users_data), 200)
 
 
-api.add_resource(Users, "/users")
+class UsersById(Resource):
+    def get(self, id):
+        user = User.query.filter_by(id=id).first()
+        if user is None:
+            return make_response({"error": "User not found"}, 404)
+        user_schema = UserSchema(exclude=("clubs.screening_rooms", "clubs.members"))
+        user_data = user_schema.dump(user)
+        return make_response(jsonify(user_data), 200)
 
 
 class Clubs(Resource):
@@ -184,9 +230,6 @@ class Clubs(Resource):
     #     pass
 
 
-api.add_resource(Clubs, "/clubs")
-
-
 class ClubsById(Resource):
     def get(self, id):
         club = Club.query.filter_by(id=id).first()
@@ -196,9 +239,6 @@ class ClubsById(Resource):
         club_schema = ClubSchema()
         club_data = club_schema.dump(club)
         return make_response(jsonify(club_data), 200)
-
-
-api.add_resource(ClubsById, "/clubs/<int:id>")
 
 
 class ScreeningRooms(Resource):
@@ -211,7 +251,15 @@ class ScreeningRooms(Resource):
         return make_response(jsonify(rooms_data), 200)
 
 
-api.add_resource(ScreeningRooms, "/rooms")
+class ScreeningRoomsById(Resource):
+    def get(self, id):
+        room = ScreeningRoom.query.filter_by(id=id).first()
+        if room is None:
+            return make_response({"error": "Screening room not found"}, 404)
+        # return make_response(club.to_dict(), 200)
+        room_schema = ScreeningRoomSchema()
+        room_data = room_schema.dump(room)
+        return make_response(jsonify(room_data), 200)
 
 
 class Posts(Resource):
@@ -224,7 +272,14 @@ class Posts(Resource):
         return make_response(jsonify(posts_data), 200)
 
 
-api.add_resource(Posts, "/posts")
+class PostsById(Resource):
+    def get(self, id):
+        post = Post.query.filter_by(id=id).first()
+        if post is None:
+            return make_response({"error": "Post not found"}, 404)
+        post_schema = PostSchema()
+        post_data = post_schema.dump(post)
+        return make_response(jsonify(post_data), 200)
 
 
 class Ratings(Resource):
@@ -237,7 +292,28 @@ class Ratings(Resource):
         return make_response(jsonify(ratings_data), 200)
 
 
+class RatingsById(Resource):
+    def get(self, id):
+        rating = Rating.query.filter_by(id=id).first()
+        if rating is None:
+            return make_response({"error": "Rating not found"}, 404)
+        rating_schema = RatingSchema()
+        rating_data = rating_schema.dump(rating)
+        return make_response(jsonify(rating_data), 200)
+
+
+api.add_resource(Movies, "/movies")
+api.add_resource(MoviesById, "/movies/<int:id>")
+api.add_resource(Users, "/users")
+api.add_resource(UsersById, "/users/<int:id>")
+api.add_resource(Clubs, "/clubs")
+api.add_resource(ClubsById, "/clubs/<int:id>")
+api.add_resource(ScreeningRooms, "/rooms")
+api.add_resource(ScreeningRoomsById, "/rooms/<int:id>")
+api.add_resource(Posts, "/posts")
+api.add_resource(PostsById, "/posts/<int:id>")
 api.add_resource(Ratings, "/ratings")
+api.add_resource(RatingsById, "/ratings/<int:id>")
 
 if __name__ == "__main__":
     app.run(port=5555, debug=True)
