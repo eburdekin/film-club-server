@@ -2,6 +2,7 @@
 
 from flask import Flask, jsonify, request, make_response
 from flask_marshmallow import Marshmallow
+from marshmallow import fields
 from flask_migrate import Migrate
 from flask_restful import Api, Resource
 from flask_cors import CORS
@@ -53,6 +54,10 @@ class UserSchema(ma.SQLAlchemySchema):
     username = ma.auto_field()
     email = ma.auto_field()
     bio = ma.auto_field()
+    clubs = fields.Nested("ClubSchema", many=True)
+    posts = fields.Nested("PostSchema", many=True, exclude=("author", "author_id"))
+    ratings = fields.Nested("RatingSchema", many=True, exclude=("author", "author_id"))
+
     # how to add relationships?
 
 
@@ -66,6 +71,15 @@ class ClubSchema(ma.SQLAlchemySchema):
     name = ma.auto_field()
     description = ma.auto_field()
     privacy_setting = ma.auto_field()
+    members = fields.Nested(
+        "UserSchema",
+        many=True,
+        only=(
+            "id",
+            "username",
+        ),
+    )
+
     # how to add relationships?
 
 
@@ -79,6 +93,8 @@ class ScreeningRoomSchema(ma.SQLAlchemySchema):
     name = ma.auto_field()
     club_id = ma.auto_field()
     movie_id = ma.auto_field()
+    club = fields.Nested("ClubSchema", only=("id", "name"))
+    movie = fields.Nested("MovieSchema", only=("id", "title"))
 
 
 class PostSchema(ma.SQLAlchemySchema):
@@ -90,6 +106,7 @@ class PostSchema(ma.SQLAlchemySchema):
     id = ma.auto_field()
     content = ma.auto_field()
     author_id = ma.auto_field()
+    author = fields.Nested("UserSchema", only=("username",))
     screening_room_id = ma.auto_field()
     timestamp = ma.auto_field()
 
@@ -103,6 +120,7 @@ class RatingSchema(ma.SQLAlchemySchema):
     id = ma.auto_field()
     rating = ma.auto_field()
     author_id = ma.auto_field()
+    author = fields.Nested("UserSchema", only=("username",))
     screening_room_id = ma.auto_field()
     timestamp = ma.auto_field()
 
