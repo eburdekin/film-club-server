@@ -71,6 +71,9 @@ class ClubSchema(ma.SQLAlchemySchema):
     name = ma.auto_field()
     description = ma.auto_field()
     privacy_setting = ma.auto_field()
+    screening_rooms = fields.Nested(
+        "ScreeningRoomSchema", many=True, only=("id", "name", "movie")
+    )
     members = fields.Nested(
         "UserSchema",
         many=True,
@@ -91,8 +94,8 @@ class ScreeningRoomSchema(ma.SQLAlchemySchema):
 
     id = ma.auto_field()
     name = ma.auto_field()
-    club_id = ma.auto_field()
-    movie_id = ma.auto_field()
+    # club_id = ma.auto_field()
+    # movie_id = ma.auto_field()
     club = fields.Nested("ClubSchema", only=("id", "name"))
     movie = fields.Nested("MovieSchema", only=("id", "title"))
 
