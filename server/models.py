@@ -10,56 +10,7 @@ club_members = db.Table(
 )
 
 
-class User(db.Model, SerializerMixin):
-    __tablename__ = "users"
-
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String, nullable=False)
-    email = db.Column(db.String, nullable=False)
-    # _password_hash = db.Column(db.String)
-    profile_picture = db.Column(db.String)
-    bio = db.Column(db.String)
-
-    # Define relationship to posts and ratings
-    posts = db.relationship("Post", backref="author", lazy="dynamic")
-
-    ratings = db.relationship("Rating", backref="user", lazy="dynamic")
-
-    serialize_rules = ("-posts.user", "-ratings.user")
-
-    # Define relationship to clubs
-    # clubs = db.relationship(
-    #     "Club", secondary="club_members", backref=db.backref("members", lazy="dynamic")
-    # )
-    # clubs = db.relationship(
-    #     "Club", secondary=club_members, backref=db.backref("members", lazy="dynamic")
-    # )
-    # Authentication
-
-    # @hybrid_property
-    # def password_hash(self):
-    #     raise AttributeError("Password hashes may not be viewed.")
-
-    # @password_hash.setter
-    # def password_hash(self, password):
-    #     password_hash = bcrypt.generate_password_hash(password.encode("utf-8"))
-    #     self._password_hash = password_hash.decode("utf-8")
-
-    # def authenticate(self, password):
-    #     return bcrypt.check_password_hash(self._password_hash, password.encode("utf-8"))
-
-    def __init__(self, username, email, profile_picture=None, bio=None):
-        self.username = username
-        self.email = email
-        # self.password_hash = password
-        self.profile_picture = profile_picture
-        self.bio = bio
-
-    def __repr__(self):
-        return f"<User {self.username}, id # {self.id}>"
-
-
-class Movie(db.Model, SerializerMixin):
+class Movie(db.Model):
     __tablename__ = "movies"
 
     id = db.Column(db.Integer, primary_key=True)
@@ -100,7 +51,56 @@ class Movie(db.Model, SerializerMixin):
         return f"<Movie {self.title}, id # {self.id}>"
 
 
-class Club(db.Model, SerializerMixin):
+class User(db.Model):
+    __tablename__ = "users"
+
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String, nullable=False)
+    email = db.Column(db.String, nullable=False)
+    # _password_hash = db.Column(db.String)
+    profile_picture = db.Column(db.String)
+    bio = db.Column(db.String)
+
+    # Define relationship to posts and ratings
+    posts = db.relationship("Post", backref="author", lazy="dynamic")
+
+    ratings = db.relationship("Rating", backref="user", lazy="dynamic")
+
+    # serialize_rules = ("-posts.user", "-ratings.user")
+
+    # Define relationship to clubs
+    # clubs = db.relationship(
+    #     "Club", secondary="club_members", backref=db.backref("members", lazy="dynamic")
+    # )
+    # clubs = db.relationship(
+    #     "Club", secondary=club_members, backref=db.backref("members", lazy="dynamic")
+    # )
+    # Authentication
+
+    # @hybrid_property
+    # def password_hash(self):
+    #     raise AttributeError("Password hashes may not be viewed.")
+
+    # @password_hash.setter
+    # def password_hash(self, password):
+    #     password_hash = bcrypt.generate_password_hash(password.encode("utf-8"))
+    #     self._password_hash = password_hash.decode("utf-8")
+
+    # def authenticate(self, password):
+    #     return bcrypt.check_password_hash(self._password_hash, password.encode("utf-8"))
+
+    def __init__(self, username, email, profile_picture=None, bio=None):
+        self.username = username
+        self.email = email
+        # self.password_hash = password
+        self.profile_picture = profile_picture
+        self.bio = bio
+
+    def __repr__(self):
+        return f"<User {self.username}, id # {self.id}>"
+
+
+class Club(db.Model):
     __tablename__ = "clubs"
 
     id = db.Column(db.Integer, primary_key=True)
@@ -115,7 +115,7 @@ class Club(db.Model, SerializerMixin):
     screening_rooms = db.relationship("ScreeningRoom", backref="club")
 
     # Add other relevant fields as needed, e.g., creation_date, privacy_settings, etc.
-    serialize_rules = ("-screening_rooms.club", "-members.clubs")
+    # serialize_rules = ("-screening_rooms.club", "-members.clubs")
 
     def __init__(self, name, description=None, owner_id=None):
         self.name = name
@@ -126,7 +126,7 @@ class Club(db.Model, SerializerMixin):
         return f"<Club {self.name}, id # {self.id}>"
 
 
-class ScreeningRoom(db.Model, SerializerMixin):
+class ScreeningRoom(db.Model):
     __tablename__ = "screening_rooms"
 
     id = db.Column(db.Integer, primary_key=True)
@@ -140,7 +140,7 @@ class ScreeningRoom(db.Model, SerializerMixin):
 
     ratings = db.relationship("Rating", backref="screening_room", lazy="dynamic")
 
-    serialize_rules = ("-movie.screening_rooms",)
+    # serialize_rules = ("-movie.screening_rooms",)
 
     def __init__(
         self,
@@ -156,7 +156,7 @@ class ScreeningRoom(db.Model, SerializerMixin):
         return f"<Screening Room {self.name}, id # {self.id}>"
 
 
-class Post(db.Model, SerializerMixin):
+class Post(db.Model):
     __tablename__ = "posts"
 
     id = db.Column(db.Integer, primary_key=True)
@@ -165,7 +165,7 @@ class Post(db.Model, SerializerMixin):
     screening_room_id = db.Column(db.Integer, db.ForeignKey("screening_rooms.id"))
     timestamp = db.Column(db.DateTime, default=db.func.now())
 
-    serialize_only = ("content", "timestamp")
+    # serialize_only = ("content", "timestamp")
 
     def __init__(self, content, author_id, screening_room_id):
         self.content = content
@@ -176,7 +176,7 @@ class Post(db.Model, SerializerMixin):
         return f"<Post id # {self.id}>"
 
 
-class Rating(db.Model, SerializerMixin):
+class Rating(db.Model):
     __tablename__ = "ratings"
 
     id = db.Column(db.Integer, primary_key=True)
