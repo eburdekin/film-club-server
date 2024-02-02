@@ -115,9 +115,6 @@ class Club(db.Model):
 
     screening_rooms = db.relationship("ScreeningRoom", backref="club")
 
-    # Add other relevant fields as needed, e.g., creation_date, privacy_settings, etc.
-    # serialize_rules = ("-screening_rooms.club", "-members.clubs")
-
     def __init__(self, name, description=None, owner_id=None):
         self.name = name
         self.description = description
@@ -135,13 +132,11 @@ class ScreeningRoom(db.Model):
     club_id = db.Column(db.Integer, db.ForeignKey("clubs.id"))
     movie_id = db.Column(db.Integer, db.ForeignKey("movies.id"))
 
-    # movie = db.relationship("Movie", backref="screening_room")  # Define relationship
+    ## need to validate club and movie IDs exist
 
     posts = db.relationship("Post", backref="screening_room", lazy="dynamic")
 
     ratings = db.relationship("Rating", backref="screening_room", lazy="dynamic")
-
-    # serialize_rules = ("-movie.screening_rooms",)
 
     def __init__(
         self,

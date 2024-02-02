@@ -48,24 +48,28 @@ class UserSchema(ma.SQLAlchemySchema):
     class Meta:
         model = User
         load_instance = True
-        # include_relationships = True
 
     id = ma.auto_field()
     username = ma.auto_field()
     email = ma.auto_field()
     bio = ma.auto_field()
     clubs = fields.Nested("ClubSchema", many=True)
-    posts = fields.Nested("PostSchema", many=True, exclude=("author", "author_id"))
-    ratings = fields.Nested("RatingSchema", many=True, exclude=("author", "author_id"))
-
-    # how to add relationships?
+    posts = fields.Nested(
+        "PostSchema",
+        many=True,
+        exclude=("author",),
+    )
+    ratings = fields.Nested(
+        "RatingSchema",
+        many=True,
+        exclude=("author",),
+    )
 
 
 class ClubSchema(ma.SQLAlchemySchema):
     class Meta:
         model = Club
         load_instance = True
-        # include_relationships = True
 
     id = ma.auto_field()
     name = ma.auto_field()
@@ -83,19 +87,16 @@ class ClubSchema(ma.SQLAlchemySchema):
         ),
     )
 
-    # how to add relationships?
-
 
 class ScreeningRoomSchema(ma.SQLAlchemySchema):
     class Meta:
         model = ScreeningRoom
         load_instance = True
-        # include_relationships = True
 
     id = ma.auto_field()
     name = ma.auto_field()
-    # club_id = ma.auto_field()
-    # movie_id = ma.auto_field()
+    club_id = ma.auto_field()
+    movie_id = ma.auto_field()
     club = fields.Nested("ClubSchema", only=("id", "name"))
     movie = fields.Nested("MovieSchema", only=("id", "title"))
 
@@ -104,7 +105,6 @@ class PostSchema(ma.SQLAlchemySchema):
     class Meta:
         model = Post
         load_instance = True
-        # include_relationships = True
 
     id = ma.auto_field()
     content = ma.auto_field()
@@ -134,7 +134,6 @@ class RatingSchema(ma.SQLAlchemySchema):
     class Meta:
         model = Rating
         load_instance = True
-        # include_relationships = True
 
     id = ma.auto_field()
     rating = ma.auto_field()
@@ -196,7 +195,7 @@ class Movies(Resource):
             return movie_schema.dump(new_movie), 201
         except Exception as e:
             db.session.rollback()
-            abort(400, str(e))
+            return make_response({"error": e.__str__()}, 400)
 
 
 class MoviesById(Resource):
@@ -244,6 +243,18 @@ class Users(Resource):
         users_data = user_schema.dump(users)
         return make_response(jsonify(users_data), 200)
 
+    def post(self):
+        data = request.json
+        user_schema = UserSchema()
+        try:
+            new_user = user_schema.load(data)
+            db.session.add(new_user)
+            db.session.commit()
+            return user_schema.dump(new_user), 201
+        except Exception as e:
+            db.session.rollback()
+            return make_response({"error": e.__str__()}, 400)
+
 
 class UsersById(Resource):
     def get(self, id):
@@ -254,6 +265,28 @@ class UsersById(Resource):
         user_data = user_schema.dump(user)
         return make_response(jsonify(user_data), 200)
 
+    def patch(self, id):
+        user = User.query.get(id)
+        if not user:
+            return make_response({"error": "User not found"}, 404)
+        data = request.json
+        user_schema = UserSchema()
+        try:
+            updated_user = user_schema.load(data, instance=user, partial=True)
+            db.session.commit()
+            return user_schema.dump(updated_user), 200
+        except Exception as e:
+            db.session.rollback()
+            return make_response({"error": e.__str__()}, 400)
+
+    def delete(self, id):
+        user = User.query.get(id)
+        if not user:
+            return make_response({"error": "User not found"}, 404)
+        db.session.delete(user)
+        db.session.commit()
+        return {"message": "User deleted successfully"}, 200
+
 
 class Clubs(Resource):
     def get(self):
@@ -263,6 +296,19 @@ class Clubs(Resource):
         club_schema = ClubSchema(many=True)
         clubs_data = club_schema.dump(clubs)
         return make_response(jsonify(clubs_data), 200)
+
+    ### user who posts new club needs to be set as owner
+    def post(self):
+        data = request.json
+        club_schema = ClubSchema()
+        try:
+            new_club = club_schema.load(data)
+            db.session.add(new_club)
+            db.session.commit()
+            return club_schema.dump(new_club), 201
+        except Exception as e:
+            db.session.rollback()
+            return make_response({"error": e.__str__()}, 400)
 
     # @jwt_required
     # def post(self):
@@ -279,6 +325,30 @@ class ClubsById(Resource):
         club_data = club_schema.dump(club)
         return make_response(jsonify(club_data), 200)
 
+    ### make club owner only
+    def patch(self, id):
+        club = Club.query.get(id)
+        if not club:
+            return make_response({"error": "Club not found"}, 404)
+        data = request.json
+        club_schema = ClubSchema()
+        try:
+            updated_club = club_schema.load(data, instance=club, partial=True)
+            db.session.commit()
+            return club_schema.dump(updated_club), 200
+        except Exception as e:
+            db.session.rollback()
+            return make_response({"error": e.__str__()}, 400)
+
+    ### make club owner only
+    def delete(self, id):
+        club = Club.query.get(id)
+        if not club:
+            return make_response({"error": "Club not found"}, 404)
+        db.session.delete(club)
+        db.session.commit()
+        return {"message": "Club deleted successfully"}, 200
+
 
 class ScreeningRooms(Resource):
     def get(self):
@@ -288,6 +358,19 @@ class ScreeningRooms(Resource):
         room_schema = ScreeningRoomSchema(many=True)
         rooms_data = room_schema.dump(rooms)
         return make_response(jsonify(rooms_data), 200)
+
+    ### make club owner only
+    def post(self):
+        data = request.json
+        room_schema = ScreeningRoomSchema()
+        try:
+            new_room = room_schema.load(data)
+            db.session.add(new_room)
+            db.session.commit()
+            return room_schema.dump(new_room), 201
+        except Exception as e:
+            db.session.rollback()
+            return make_response({"error": e.__str__()}, 400)
 
 
 class ScreeningRoomsById(Resource):
@@ -299,6 +382,30 @@ class ScreeningRoomsById(Resource):
         room_schema = ScreeningRoomSchema()
         room_data = room_schema.dump(room)
         return make_response(jsonify(room_data), 200)
+
+    ### make club owner only
+    def patch(self, id):
+        room = ScreeningRoom.query.get(id)
+        if not room:
+            return make_response({"error": "Screening room not found"}, 404)
+        data = request.json
+        room_schema = ScreeningRoomSchema()
+        try:
+            updated_room = room_schema.load(data, instance=room, partial=True)
+            db.session.commit()
+            return room_schema.dump(updated_room), 200
+        except Exception as e:
+            db.session.rollback()
+            return make_response({"error": e.__str__()}, 400)
+
+    ### make club owner only
+    def delete(self, id):
+        room = ScreeningRoom.query.get(id)
+        if not room:
+            return make_response({"error": "Screening room not found"}, 404)
+        db.session.delete(room)
+        db.session.commit()
+        return {"message": "Screening room deleted successfully"}, 200
 
 
 class Posts(Resource):
