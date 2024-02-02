@@ -185,15 +185,54 @@ class Movies(Resource):
         movies_data = movie_schema.dump(movies)
         return make_response(jsonify(movies_data), 200)
 
+    ### make admin only
+    def post(self):
+        data = request.json
+        movie_schema = MovieSchema()
+        try:
+            new_movie = movie_schema.load(data)
+            db.session.add(new_movie)
+            db.session.commit()
+            return movie_schema.dump(new_movie), 201
+        except Exception as e:
+            db.session.rollback()
+            abort(400, str(e))
+
 
 class MoviesById(Resource):
     def get(self, id):
         movie = Movie.query.filter_by(id=id).first()
-        if movie is None:
+        if not movie:
             return make_response({"error": "Movie not found"}, 404)
         movie_schema = MovieSchema()
         movie_data = movie_schema.dump(movie)
         return make_response(jsonify(movie_data), 200)
+
+    ### make admin only
+    def patch(self, id):
+        # Update an existing movie
+        movie = Movie.query.get(id)
+        if not movie:
+            return make_response({"error": "Movie not found"}, 404)
+        data = request.json
+        movie_schema = MovieSchema()
+        try:
+            updated_movie = movie_schema.load(data, instance=movie, partial=True)
+            db.session.commit()
+            return movie_schema.dump(updated_movie), 200
+        except Exception as e:
+            db.session.rollback()
+            return make_response({"error": e.__str__()}, 400)
+
+    ### make admin only
+    def delete(self, id):
+        # Delete an existing movie
+        movie = Movie.query.get(id)
+        if not movie:
+            return make_response({"error": "Movie not found"}, 404)
+        db.session.delete(movie)
+        db.session.commit()
+        return {"message": "Movie deleted successfully"}, 200
 
 
 class Users(Resource):
