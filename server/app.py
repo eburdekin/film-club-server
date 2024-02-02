@@ -108,7 +108,7 @@ class PostSchema(ma.SQLAlchemySchema):
 
     id = ma.auto_field()
     content = ma.auto_field()
-    # author_id = ma.auto_field()
+    author_id = ma.auto_field()
     author = fields.Nested(
         "UserSchema",
         only=(
@@ -116,7 +116,7 @@ class PostSchema(ma.SQLAlchemySchema):
             "username",
         ),
     )
-    # screening_room_id = ma.auto_field()
+    screening_room_id = ma.auto_field()
     screening_room = fields.Nested(
         "ScreeningRoomSchema",
         only=(
@@ -137,7 +137,7 @@ class RatingSchema(ma.SQLAlchemySchema):
 
     id = ma.auto_field()
     rating = ma.auto_field()
-    # author_id = ma.auto_field()
+    author_id = ma.auto_field()
     author = fields.Nested(
         "UserSchema",
         only=(
@@ -145,7 +145,7 @@ class RatingSchema(ma.SQLAlchemySchema):
             "username",
         ),
     )
-    # screening_room_id = ma.auto_field()
+    screening_room_id = ma.auto_field()
     screening_room = fields.Nested(
         "ScreeningRoomSchema",
         only=(
@@ -177,8 +177,6 @@ def index():
 
 class Movies(Resource):
     def get(self):
-        # movies = [movie.to_dict() for movie in Movie.query.all()]
-        # return make_response(jsonify(movies), 200)
         movies = Movie.query.all()
         movie_schema = MovieSchema(many=True)
         movies_data = movie_schema.dump(movies)
@@ -236,8 +234,6 @@ class MoviesById(Resource):
 
 class Users(Resource):
     def get(self):
-        # users = [user.to_dict() for user in User.query.all()]
-        # return make_response(jsonify(users), 200)
         users = User.query.all()
         user_schema = UserSchema(many=True)
         users_data = user_schema.dump(users)
@@ -290,8 +286,6 @@ class UsersById(Resource):
 
 class Clubs(Resource):
     def get(self):
-        # clubs = [club.to_dict() for club in Club.query.all()]
-        # return make_response(jsonify(clubs), 200)
         clubs = Club.query.all()
         club_schema = ClubSchema(many=True)
         clubs_data = club_schema.dump(clubs)
@@ -352,8 +346,6 @@ class ClubsById(Resource):
 
 class ScreeningRooms(Resource):
     def get(self):
-        # rooms = [room.to_dict() for room in ScreeningRoom.query.all()]
-        # return make_response(jsonify(rooms), 200)
         rooms = ScreeningRoom.query.all()
         room_schema = ScreeningRoomSchema(many=True)
         rooms_data = room_schema.dump(rooms)
@@ -410,12 +402,22 @@ class ScreeningRoomsById(Resource):
 
 class Posts(Resource):
     def get(self):
-        # posts = [post.to_dict() for post in Post.query.all()]
-        # return make_response(jsonify(posts), 200)
         posts = Post.query.all()
         post_schema = PostSchema(many=True)
         posts_data = post_schema.dump(posts)
         return make_response(jsonify(posts_data), 200)
+
+    def post(self):
+        data = request.json
+        post_schema = PostSchema()
+        try:
+            new_post = post_schema.load(data)
+            db.session.add(new_post)
+            db.session.commit()
+            return post_schema.dump(new_post), 201
+        except Exception as e:
+            db.session.rollback()
+            return make_response({"error": e.__str__()}, 400)
 
 
 class PostsById(Resource):
@@ -427,15 +429,47 @@ class PostsById(Resource):
         post_data = post_schema.dump(post)
         return make_response(jsonify(post_data), 200)
 
+    def patch(self, id):
+        post = Post.query.get(id)
+        if not post:
+            return make_response({"error": "Post not found"}, 404)
+        data = request.json
+        post_schema = PostSchema()
+        try:
+            updated_post = post_schema.load(data, instance=post, partial=True)
+            db.session.commit()
+            return post_schema.dump(updated_post), 200
+        except Exception as e:
+            db.session.rollback()
+            return make_response({"error": e.__str__()}, 400)
+
+    def delete(self, id):
+        post = Post.query.get(id)
+        if not post:
+            return make_response({"error": "Post not found"}, 404)
+        db.session.delete(post)
+        db.session.commit()
+        return {"message": "Post deleted successfully"}, 200
+
 
 class Ratings(Resource):
     def get(self):
-        # ratings = [rating.to_dict() for rating in Rating.query.all()]
-        # return make_response(jsonify(ratings), 200)
         ratings = Rating.query.all()
         rating_schema = RatingSchema(many=True)
         ratings_data = rating_schema.dump(ratings)
         return make_response(jsonify(ratings_data), 200)
+
+    def post(self):
+        data = request.json
+        rating_schema = RatingSchema()
+        try:
+            new_rating = rating_schema.load(data)
+            db.session.add(new_rating)
+            db.session.commit()
+            return rating_schema.dump(new_rating), 201
+        except Exception as e:
+            db.session.rollback()
+            return make_response({"error": e.__str__()}, 400)
 
 
 class RatingsById(Resource):
@@ -446,6 +480,28 @@ class RatingsById(Resource):
         rating_schema = RatingSchema()
         rating_data = rating_schema.dump(rating)
         return make_response(jsonify(rating_data), 200)
+
+    def patch(self, id):
+        rating = Rating.query.get(id)
+        if not rating:
+            return make_response({"error": "Rating not found"}, 404)
+        data = request.json
+        rating_schema = RatingSchema()
+        try:
+            updated_rating = rating_schema.load(data, instance=rating, partial=True)
+            db.session.commit()
+            return rating_schema.dump(updated_rating), 200
+        except Exception as e:
+            db.session.rollback()
+            return make_response({"error": e.__str__()}, 400)
+
+    def delete(self, id):
+        rating = Rating.query.get(id)
+        if not rating:
+            return make_response({"error": "Rating not found"}, 404)
+        db.session.delete(rating)
+        db.session.commit()
+        return {"message": "Rating deleted successfully"}, 200
 
 
 api.add_resource(Movies, "/movies")
