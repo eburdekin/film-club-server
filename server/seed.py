@@ -40,8 +40,12 @@ with app.app_context():
         db.session.add(movie)
 
     print("Seeding film club data...")
-    club1 = Club(name="Criterion Classics", description="We watch Criterion movies.")
-    club2 = Club(name="Foreign Cinema", description="We love subtitles.")
+    club1 = Club(
+        name="Criterion Classics",
+        description="We watch Criterion movies.",
+        public=True,
+    )
+    club2 = Club(name="Foreign Cinema", description="We love subtitles.", public=True)
 
     clubs = [club1, club2]
 
