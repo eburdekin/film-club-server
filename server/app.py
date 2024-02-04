@@ -2,7 +2,7 @@
 
 from flask import Flask, jsonify, request, make_response
 from flask_marshmallow import Marshmallow
-from marshmallow import fields
+from marshmallow import Schema, fields, validate, ValidationError
 from flask_migrate import Migrate
 from flask_restful import Api, Resource
 from flask_cors import CORS
@@ -159,6 +159,15 @@ class RatingSchema(ma.SQLAlchemySchema):
     )
 
 
+# Validation
+
+
+class ClubPostSchema(Schema):
+    name = fields.String(required=True, validate=validate.Length(min=1, max=50))
+    description = fields.String(required=True, validate=validate.Length(min=1, max=150))
+    public = fields.Boolean(required=True)
+
+
 # API Routes
 
 
@@ -294,15 +303,22 @@ class Clubs(Resource):
     ### user who posts new club needs to be set as owner
     def post(self):
         data = request.json
+        # Validate incoming data
+        try:
+            validated_data = ClubPostSchema().load(data)
+        except ValidationError as e:
+            return make_response({"error": e.messages}, 400)
+
+        # Process the validated data
         club_schema = ClubSchema()
         try:
-            new_club = club_schema.load(data)
+            new_club = club_schema.load(validated_data)
             db.session.add(new_club)
             db.session.commit()
             return club_schema.dump(new_club), 201
         except Exception as e:
             db.session.rollback()
-            return make_response({"error": e.__str__()}, 400)
+            return make_response({"error": str(e)}, 400)
 
     # @jwt_required
     # def post(self):
