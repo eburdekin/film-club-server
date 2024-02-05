@@ -1,28 +1,50 @@
-#!/usr/bin/env python3
+# #!/usr/bin/env python3
 
-from flask import Flask, jsonify, request, make_response
-from flask_marshmallow import Marshmallow
-from marshmallow import Schema, fields, validate, ValidationError
-from flask_migrate import Migrate
-from flask_restful import Api, Resource
-from flask_cors import CORS
+# from flask import Flask, jsonify, request, make_response
+# from flask_marshmallow import Marshmallow
+# from marshmallow import Schema, fields, validate, ValidationError
+# from flask_bcrypt import Bcrypt
+# from flask_jwt_extended import (
+#     JWTManager,
+#     jwt_required,
+#     create_access_token,
+#     get_jwt_identity,
+# )
+# from flask_migrate import Migrate
+# from flask_restful import Api, Resource, reqparse
+# from flask_cors import CORS
 
-# from flask_jwt_extended import JWTManager, jwt_required, create_access_token
+# # from flask_jwt_extended import JWTManager, jwt_required, create_access_token
+
+# from models import db, Movie, User, Club, ScreeningRoom, Post, Rating
+
+# app = Flask(__name__)
+# # need to make this private
+# app.secret_key = "ErrD76SEpKMDMcq71y4WfqnsZRDogwU3yZs6dKr0S2M4tHaA0KksY585UWR3psX"
+# app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///filmclub.db"
+# app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+# app.json.compact = False
+
+# bcrypt = Bcrypt(app)
+# jwt = JWTManager(app)
+
+# migrate = Migrate(app, db)
+# db.init_app(app)
+
+# ma = Marshmallow(app)
+
+# api = Api(app)
+# CORS(app)
+
 
 from models import db, Movie, User, Club, ScreeningRoom, Post, Rating
 
-app = Flask(__name__)
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///filmclub.db"
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-app.json.compact = False
 
-migrate = Migrate(app, db)
-db.init_app(app)
+from flask import request, session, make_response, jsonify
+from flask_restful import Resource
+from marshmallow import Schema, fields, validate, ValidationError
 
-ma = Marshmallow(app)
-
-api = Api(app)
-CORS(app)
+from config import app, api, ma
 
 # Schemas
 
@@ -163,8 +185,22 @@ class RatingSchema(ma.SQLAlchemySchema):
 
 
 class ClubPostSchema(Schema):
-    name = fields.String(required=True, validate=validate.Length(min=1, max=50))
-    description = fields.String(required=True, validate=validate.Length(min=1, max=150))
+    name = fields.String(
+        required=True,
+        validate=validate.Length(
+            min=1, max=50, error="Club name length must be between 1 and 50 characters"
+        ),
+        error_messages={"required": "Club name is required"},
+    )
+    description = fields.String(
+        required=True,
+        validate=validate.Length(
+            min=1,
+            max=150,
+            error="Club description length must be between 1 and 150 characters",
+        ),
+        error_messages={"required": "Club description is required"},
+    )
     public = fields.Boolean(required=True)
 
 
@@ -182,6 +218,64 @@ def index():
 
 #     if (request.endpoint) not in open_access_list and (not session.get("user_id")):
 #         return {"error": "401 Unauthorized"}, 401
+
+
+# class SignupResource(Resource):
+#     def post(self):
+#         parser = reqparse.RequestParser()
+#         parser.add_argument("username", type=str, required=True)
+#         parser.add_argument("email", type=str, required=True)
+#         parser.add_argument("password", type=str, required=True)
+#         # You may include other fields like profile picture, bio, etc., as needed
+#         data = parser.parse_args()
+
+#         username = data["username"]
+#         email = data["email"]
+#         password = data["password"]
+
+#         # Check if the username or email already exists
+#         if User.query.filter_by(username=username).first() is not None:
+#             return {"msg": "Username already exists"}, 400
+#         if User.query.filter_by(email=email).first() is not None:
+#             return {"msg": "Email already exists"}, 400
+
+#         # Create a new user
+#         new_user = User(username=username, email=email)
+#         new_user._password_hash = password  # Set password using hashing method
+
+#         # Add the new user to the database
+#         db.session.add(new_user)
+#         db.session.commit()
+
+#         # Optionally, you can generate an access token and return it upon signup
+#         access_token = create_access_token(identity=new_user.id)
+
+#         return {"msg": "User created successfully", "access_token": access_token}, 201
+
+
+# class LoginResource(Resource):
+#     def post(self):
+#         parser = reqparse.RequestParser()
+#         parser.add_argument("username", type=str, required=True)
+#         parser.add_argument("password", type=str, required=True)
+#         data = parser.parse_args()
+
+#         username = data["username"]
+#         password = data["password"]
+
+#         user = User.query.filter_by(username=username).first()
+#         if not user or not user.authenticate(password):
+#             return {"msg": "Bad username or password"}, 401
+
+#         access_token = create_access_token(identity=user.id)
+#         return {"access_token": access_token}, 200
+
+
+# class ProtectedResource(Resource):
+#     @jwt_required()
+#     def get(self):
+#         current_user_id = get_jwt_identity()
+#         return {"logged_in_as": current_user_id}, 200
 
 
 class Movies(Resource):
@@ -520,6 +614,9 @@ class RatingsById(Resource):
         return {"message": "Rating deleted successfully"}, 200
 
 
+# api.add_resource(SignupResource, "/signup")
+# api.add_resource(LoginResource, "/login")
+# api.add_resource(ProtectedResource, "/protected")
 api.add_resource(Movies, "/movies")
 api.add_resource(MoviesById, "/movies/<int:id>")
 api.add_resource(Users, "/users")

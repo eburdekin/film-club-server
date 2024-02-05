@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from app import app
-from models import db, User, Movie, Club, ScreeningRoom, Post
+from models import db, User, Movie, Club, ScreeningRoom, Post, Rating
 
 # import requests for tMDB API call
 import requests
@@ -16,11 +16,12 @@ with app.app_context():
     Club.query.delete()
     ScreeningRoom.query.delete()
     Post.query.delete()
+    Rating.query.delete()
 
-    print("Seeding user data...")
-    user1 = User(username="burdaq", email="eileenburdekin@proton.me")
+    # print("Seeding user data...")
+    # user1 = User(username="burdaq", email="eileenburdekin@proton.me")
 
-    db.session.add(user1)
+    # db.session.add(user1)
 
     print("Seeding movie data...")
     url = f"https://api.themoviedb.org/3/movie/popular?api_key={TMDB_API_KEY}"
@@ -62,8 +63,8 @@ with app.app_context():
     # print("Assigning users to clubs...")
     # user1.clubs.append(club1)
 
-    print("Adding a post...")
-    post1 = Post(content="This is a sample post.", author_id=1, screening_room_id=1)
-    db.session.add(post1)
+    # print("Adding a post...")
+    # post1 = Post(content="This is a sample post.", author_id=1, screening_room_id=1)
+    # db.session.add(post1)
 
     db.session.commit()

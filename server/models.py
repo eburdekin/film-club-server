@@ -1,8 +1,8 @@
-from flask_sqlalchemy import SQLAlchemy
+# from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.ext.hybrid import hybrid_property
+from config import db, bcrypt
 
 # from sqlalchemy_serializer import SerializerMixin
-
-db = SQLAlchemy()
 
 club_members = db.Table(
     "club_members",
@@ -58,7 +58,7 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String, nullable=False)
     email = db.Column(db.String, nullable=False)
-    # _password_hash = db.Column(db.String)
+    _password_hash = db.Column(db.String)
     profile_picture = db.Column(db.String)
     bio = db.Column(db.String)
 
@@ -84,18 +84,15 @@ class User(db.Model):
 
     # @password_hash.setter
     # def password_hash(self, password):
-    #     password_hash = bcrypt.generate_password_hash(password.encode("utf-8"))
-    #     self._password_hash = password_hash.decode("utf-8")
+    #     self._password_hash = bcrypt.generate_password_hash(password).decode("utf-8")
 
     # def authenticate(self, password):
-    #     return bcrypt.check_password_hash(self._password_hash, password.encode("utf-8"))
-
-    def __init__(self, username, email, profile_picture=None, bio=None):
-        self.username = username
-        self.email = email
-        # self.password_hash = password
-        self.profile_picture = profile_picture
-        self.bio = bio
+    #     bcrypt.check_password_hash(self.password_hash, password.encode("utf-8"))
+    #     user_schema = UserSchema(
+    #         exclude=("clubs.screening_rooms", "clubs.members")
+    #     )
+    #     user_data = user_schema.dump(user)
+    #     return make_response(jsonify(user_data), 200)
 
     def __repr__(self):
         return f"<User {self.username}, id # {self.id}>"

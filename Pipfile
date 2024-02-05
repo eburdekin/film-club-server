@@ -19,6 +19,8 @@ requests = "*"
 flask-cors = "*"
 flask-marshmallow = "*"
 marshmallow-sqlalchemy = "*"
+flask-bcrypt = "*"
+flask-jwt-extended = "*"
 
 [requires]
 python_full_version = "3.8.13"
