@@ -3,7 +3,6 @@
 from flask import Flask, jsonify, request, make_response
 from flask_marshmallow import Marshmallow
 from flask_sqlalchemy import SQLAlchemy
-from marshmallow import Schema, fields, validate, ValidationError
 from flask_bcrypt import Bcrypt
 from flask_jwt_extended import (
     JWTManager,
@@ -12,7 +11,7 @@ from flask_jwt_extended import (
     get_jwt_identity,
 )
 from flask_migrate import Migrate
-from flask_restful import Api, Resource, reqparse
+from flask_restful import Api
 from flask_cors import CORS
 
 # from flask_jwt_extended import JWTManager, jwt_required, create_access_token

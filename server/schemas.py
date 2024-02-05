@@ -1,5 +1,5 @@
 from models import db, Movie, User, Club, ScreeningRoom, Post, Rating
-from config import app, api, ma
+from config import ma
 
 from marshmallow import Schema, fields, validate, ValidationError
 

@@ -2,7 +2,6 @@
 
 from flask import request, session, make_response, jsonify
 from flask_restful import Resource
-from marshmallow import Schema, fields, validate, ValidationError
 
 # Local imports
 from models import db, Movie, User, Club, ScreeningRoom, Post, Rating
