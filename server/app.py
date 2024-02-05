@@ -33,55 +33,47 @@ def index():
 #         return {"error": "401 Unauthorized"}, 401
 
 
-# class SignupResource(Resource):
-#     def post(self):
-#         parser = reqparse.RequestParser()
-#         parser.add_argument("username", type=str, required=True)
-#         parser.add_argument("email", type=str, required=True)
-#         parser.add_argument("password", type=str, required=True)
-#         # You may include other fields like profile picture, bio, etc., as needed
-#         data = parser.parse_args()
+class SignupResource(Resource):
+    def post(self):
+        request_json = request.get_json()
 
-#         username = data["username"]
-#         email = data["email"]
-#         password = data["password"]
+        username = request_json.get("username")
+        email = request_json.get("email")
+        password = request_json.get("password")
 
-#         # Check if the username or email already exists
-#         if User.query.filter_by(username=username).first() is not None:
-#             return {"msg": "Username already exists"}, 400
-#         if User.query.filter_by(email=email).first() is not None:
-#             return {"msg": "Email already exists"}, 400
+        # Check if the username or email already exists
+        if User.query.filter_by(username=username).first() is not None:
+            return {"msg": "Username already exists"}, 400
+        if User.query.filter_by(email=email).first() is not None:
+            return {"msg": "Email already exists"}, 400
 
-#         # Create a new user
-#         new_user = User(username=username, email=email)
-#         new_user._password_hash = password  # Set password using hashing method
+        # Create a new user
+        new_user = User(username=username, email=email)
+        new_user.password_hash = password  # Set password using hashing method
 
-#         # Add the new user to the database
-#         db.session.add(new_user)
-#         db.session.commit()
+        # Add the new user to the database
+        db.session.add(new_user)
+        db.session.commit()
 
-#         # Optionally, you can generate an access token and return it upon signup
-#         access_token = create_access_token(identity=new_user.id)
+        # Optionally, you can generate an access token and return it upon signup
+        # access_token = create_access_token(identity=new_user.id)
 
-#         return {"msg": "User created successfully", "access_token": access_token}, 201
+        return {"msg": "User created successfully"}, 201
 
 
-# class LoginResource(Resource):
-#     def post(self):
-#         parser = reqparse.RequestParser()
-#         parser.add_argument("username", type=str, required=True)
-#         parser.add_argument("password", type=str, required=True)
-#         data = parser.parse_args()
+class LoginResource(Resource):
+    def post(self):
+        request_json = request.get_json()
 
-#         username = data["username"]
-#         password = data["password"]
+        username = request_json.get("username")
+        password = request_json.get("password")
 
-#         user = User.query.filter_by(username=username).first()
-#         if not user or not user.authenticate(password):
-#             return {"msg": "Bad username or password"}, 401
+        user = User.query.filter_by(username=username).first()
+        if not user or not user.authenticate(password):
+            return {"msg": "Bad username or password"}, 401
 
-#         access_token = create_access_token(identity=user.id)
-#         return {"access_token": access_token}, 200
+        # access_token = create_access_token(identity=user.id)
+        return {"msg": "Successful login"}, 200
 
 
 # class ProtectedResource(Resource):
@@ -427,8 +419,8 @@ class RatingsById(Resource):
         return {"message": "Rating deleted successfully"}, 200
 
 
-# api.add_resource(SignupResource, "/signup")
-# api.add_resource(LoginResource, "/login")
+api.add_resource(SignupResource, "/signup")
+api.add_resource(LoginResource, "/login")
 # api.add_resource(ProtectedResource, "/protected")
 api.add_resource(Movies, "/movies")
 api.add_resource(MoviesById, "/movies/<int:id>")
