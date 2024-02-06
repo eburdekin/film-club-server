@@ -10,6 +10,12 @@ club_members = db.Table(
     db.Column("club_id", db.Integer, db.ForeignKey("clubs.id"), primary_key=True),
 )
 
+# user_roles = db.Table(
+#     "user_roles",
+#     db.Column("user_id", db.Integer, db.ForeignKey("users.id"), primary_key=True),
+#     db.Column("role_id", db.Integer, db.ForeignKey("roles.id"), primary_key=True),
+# )
+
 
 class Movie(db.Model):
     __tablename__ = "movies"
@@ -52,6 +58,13 @@ class Movie(db.Model):
         return f"<Movie {self.title}, id # {self.id}>"
 
 
+class Role(db.Model):
+    __tablename__ = "roles"
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), unique=True, nullable=False)
+
+
 class User(db.Model):
     __tablename__ = "users"
 
@@ -66,6 +79,9 @@ class User(db.Model):
     posts = db.relationship("Post", backref="author", lazy="dynamic")
 
     ratings = db.relationship("Rating", backref="user", lazy="dynamic")
+
+    role_id = db.Column(db.Integer, db.ForeignKey("roles.id"))
+    role = db.relationship("Role", backref="user", uselist=False)
 
     # serialize_rules = ("-posts.user", "-ratings.user")
 
@@ -90,6 +106,11 @@ class User(db.Model):
 
     def authenticate(self, password):
         return bcrypt.check_password_hash(self._password_hash, password.encode("utf-8"))
+
+    def __init__(self, username, email, role_id=1):
+        self.username = username
+        self.email = email
+        self.role_id = role_id
 
     def __repr__(self):
         return f"<User {self.username}, id # {self.id}>"

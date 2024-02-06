@@ -2,12 +2,14 @@
 
 from flask import request, session, make_response, jsonify
 from flask_restful import Resource
+from functools import wraps
 
 # Local imports
-from models import db, Movie, User, Club, ScreeningRoom, Post, Rating
+from models import db, Movie, Role, User, Club, ScreeningRoom, Post, Rating
 from schemas import (
     MovieSchema,
     UserSchema,
+    RoleSchema,
     ClubSchema,
     ScreeningRoomSchema,
     PostSchema,
@@ -17,19 +19,63 @@ from schemas import (
 from config import app, api
 
 
-# API Routes
+# Authentication
 
 
-@app.route("/")
-def index():
-    return "<h1>Film Club Server</h1>"
+# Function to check if the current user is an admin
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        # Check if the current user is an admin
+        if not user_has_role("admin"):
+            return jsonify({"message": "Unauthorized access"}), 401
+        return f(*args, **kwargs)
 
+    return decorated_function
+
+
+# Function to check if the user has a certain role
+def user_has_role(role_name):
+    # Get the current user (you'll need to implement this)
+    user = get_current_user()
+
+    # Check if the user has the specified role
+    if user and any(role.name == role_name for role in user.roles):
+        return True
+    return False
+
+
+class AssignRoleResource(Resource):
+    # @admin_required
+    def post(self):
+        data = request.get_json()
+        user_id = data.get("user_id")
+        role_id = data.get("role_id")
+
+        if not user_id or not role_id:
+            return {"message": "User ID and Role ID are required"}, 400
+
+        user = User.query.get(user_id)
+        role = Role.query.get(role_id)
+
+        if not user or not role:
+            return {"message": "User or Role not found"}, 404
+
+        user.roles.append(role)
+        db.session.commit()
+
+        return {"message": f"Role {role.name} assigned to user {user.username}"}, 200
+
+
+# Add the resource to the API with a specific endpoint
+api.add_resource(AssignRoleResource, "/assign_role")
 
 # @app.before_request
 # def check_if_logged_in():
-#     open_access_list = ["movies", "clubs", "screening_rooms"]
+#     open_access_list = ["check_session", "movies", "clubs"]
 
 #     if (request.endpoint) not in open_access_list and (not session.get("user_id")):
+#         # if (request.endpoint) not in open_access_list:
 #         return {"error": "401 Unauthorized"}, 401
 
 
@@ -54,7 +100,7 @@ class SignupResource(Resource):
         # Add the new user to the database
         db.session.add(new_user)
         db.session.commit()
-
+        session["user_id"] = new_user.id
         # Optionally, you can generate an access token and return it upon signup
         # access_token = create_access_token(identity=new_user.id)
 
@@ -73,14 +119,47 @@ class LoginResource(Resource):
             return {"msg": "Bad username or password"}, 401
 
         # access_token = create_access_token(identity=user.id)
-        return {"msg": "Successful login"}, 200
+        # session["user_id"] = user.id
+        user_schema = UserSchema()
+        serialized_user = user_schema.dump(user)
+
+        user_id = user.id
+
+        session["user_id"] = user_id
+
+        return {"msg": serialized_user}, 200
 
 
-# class ProtectedResource(Resource):
-#     @jwt_required()
-#     def get(self):
-#         current_user_id = get_jwt_identity()
-#         return {"logged_in_as": current_user_id}, 200
+class CheckSession(Resource):
+
+    def get(self):
+        user = User.query.filter(User.id == session.get("user_id")).first()
+        if user:
+            user_schema = UserSchema()
+            serialized_user = user_schema.dump(user)
+            return serialized_user
+        else:
+            return {"message": "401: Not Authorized"}, 401
+
+
+class Logout(Resource):
+
+    def delete(self):  # just add this line!
+        session.clear()
+        return {"message": "204: No Content"}, 204
+
+
+api.add_resource(SignupResource, "/signup")
+api.add_resource(LoginResource, "/login")
+api.add_resource(CheckSession, "/check_session")
+api.add_resource(Logout, "/logout")
+
+# API Routes
+
+
+@app.route("/")
+def index():
+    return "<h1>Film Club Server</h1>"
 
 
 class Movies(Resource):
@@ -190,6 +269,26 @@ class UsersById(Resource):
         db.session.delete(user)
         db.session.commit()
         return {"message": "User deleted successfully"}, 200
+
+
+class Roles(Resource):
+    def get(self):
+        roles = Role.query.all()
+        role_schema = RoleSchema(many=True)
+        roles_data = role_schema.dump(roles)
+        return make_response(jsonify(roles_data), 200)
+
+    def post(self):
+        data = request.json
+        role_schema = RoleSchema()
+        try:
+            new_role = role_schema.load(data)
+            db.session.add(new_role)
+            db.session.commit()
+            return role_schema.dump(new_role), 201
+        except Exception as e:
+            db.session.rollback()
+            return make_response({"error": e.__str__()}, 400)
 
 
 class Clubs(Resource):
@@ -419,13 +518,11 @@ class RatingsById(Resource):
         return {"message": "Rating deleted successfully"}, 200
 
 
-api.add_resource(SignupResource, "/signup")
-api.add_resource(LoginResource, "/login")
-# api.add_resource(ProtectedResource, "/protected")
 api.add_resource(Movies, "/movies")
 api.add_resource(MoviesById, "/movies/<int:id>")
 api.add_resource(Users, "/users")
 api.add_resource(UsersById, "/users/<int:id>")
+api.add_resource(Roles, "/roles")
 api.add_resource(Clubs, "/clubs")
 api.add_resource(ClubsById, "/clubs/<int:id>")
 api.add_resource(ScreeningRooms, "/rooms")

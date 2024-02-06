@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from config import app, db
-from models import User, Movie, Club, ScreeningRoom, Post, Rating
+from models import User, Role, Movie, Club, ScreeningRoom, Post, Rating
 
 # import requests for tMDB API call
 import requests
@@ -12,28 +12,38 @@ with app.app_context():
     # Delete existing data
     print("Deleting existing data...")
     User.query.delete()
-    Movie.query.delete()
+    # Role.query.delete()
+    # Movie.query.delete()
     Club.query.delete()
     ScreeningRoom.query.delete()
     Post.query.delete()
     Rating.query.delete()
 
-    print("Seeding movie data...")
-    url = f"https://api.themoviedb.org/3/movie/popular?api_key={TMDB_API_KEY}"
-    response = requests.get(url)
+    # print("Seeding movie data...")
+    # url = f"https://api.themoviedb.org/3/movie/popular?api_key={TMDB_API_KEY}"
+    # response = requests.get(url)
 
-    if response.status_code == 200:
-        data = response.json()
+    # if response.status_code == 200:
+    #     data = response.json()
 
-    # Extract and insert movie data into the database
-    for movie_data in data.get("results", []):
-        movie = Movie(
-            title=movie_data.get("title"),
-            release_date=movie_data.get("release_date"),
-            poster_image=movie_data.get("poster_path"),
-            # Extract other relevant fields as needed
-        )
-        db.session.add(movie)
+    # # Extract and insert movie data into the database
+    # for movie_data in data.get("results", []):
+    #     movie = Movie(
+    #         title=movie_data.get("title"),
+    #         release_date=movie_data.get("release_date"),
+    #         poster_image=movie_data.get("poster_path"),
+    #         # Extract other relevant fields as needed
+    #     )
+    #     db.session.add(movie)
+
+    print("Seeding user roles...")
+    role1 = Role(name="user")
+    role2 = Role(name="mod")
+    role3 = Role(name="admin")
+
+    roles = [role1, role2, role3]
+
+    db.session.add_all(roles)
 
     print("Seeding film club data...")
     club1 = Club(

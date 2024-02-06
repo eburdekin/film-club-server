@@ -1,4 +1,4 @@
-from models import db, Movie, User, Club, ScreeningRoom, Post, Rating
+from models import db, Movie, User, Role, Club, ScreeningRoom, Post, Rating
 from config import ma
 
 from marshmallow import Schema, fields, validate, ValidationError
@@ -43,6 +43,19 @@ class UserSchema(ma.SQLAlchemySchema):
         many=True,
         exclude=("author",),
     )
+    role = fields.Nested(
+        "RoleSchema",
+        # exclude=("author",),
+    )
+
+
+class RoleSchema(ma.SQLAlchemySchema):
+    class Meta:
+        model = Role
+        load_instance = True
+
+    id = ma.auto_field()
+    name = ma.auto_field()
 
 
 class ClubSchema(ma.SQLAlchemySchema):
