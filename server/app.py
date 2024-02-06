@@ -34,10 +34,22 @@ def admin_required(f):
     return decorated_function
 
 
+# Function to check if the current user is a moderator
+def mod_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        # Check if the current user is an admin or a mod
+        if not user_has_role("admin") and not user_has_role("mod"):
+            return jsonify({"message": "Unauthorized access"}), 401
+        return f(*args, **kwargs)
+
+    return decorated_function
+
+
 # Function to check if the user has a certain role
 def user_has_role(role_name):
-    # Get the current user (you'll need to implement this)
-    user = get_current_user()
+    # Check user from current session user_id
+    user = User.query.filter(User.id == session.get("user_id")).first()
 
     # Check if the user has the specified role
     if user and any(role.name == role_name for role in user.roles):
@@ -61,7 +73,7 @@ class AssignRoleResource(Resource):
         if not user or not role:
             return {"message": "User or Role not found"}, 404
 
-        user.roles.append(role)
+        user.role = role
         db.session.commit()
 
         return {"message": f"Role {role.name} assigned to user {user.username}"}, 200
