@@ -22,39 +22,74 @@ from config import app, api
 # Authentication
 
 
-# Function to check if the current user is an admin
 def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        # Check if the current user is an admin
-        if not user_has_role("admin"):
-            return jsonify({"message": "Unauthorized access"}), 401
-        return f(*args, **kwargs)
+        user_id = session.get("user_id")
+        if user_id:
+            if not user_has_role(user_id, "admin"):
+                return jsonify({"message": "Unauthorized access"}), 401
+            return f(*args, **kwargs)
+        return jsonify({"message": "User not logged in"}), 401
 
     return decorated_function
 
 
-# Function to check if the current user is a moderator
 def mod_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        # Check if the current user is an admin or a mod
-        if not user_has_role("admin") and not user_has_role("mod"):
-            return jsonify({"message": "Unauthorized access"}), 401
-        return f(*args, **kwargs)
+        user_id = session.get("user_id")
+        if user_id:
+            if not user_has_role(user_id, "admin") and not user_has_role(
+                user_id, "mod"
+            ):
+                return jsonify({"message": "Unauthorized access"}), 401
+            return f(*args, **kwargs)
+        return jsonify({"message": "User not logged in"}), 401
 
     return decorated_function
 
 
-# Function to check if the user has a certain role
-def user_has_role(role_name):
-    # Check user from current session user_id
-    user = User.query.filter(User.id == session.get("user_id")).first()
-
-    # Check if the user has the specified role
-    if user and any(role.name == role_name for role in user.roles):
+def user_has_role(user_id, role_name):
+    user = User.query.filter_by(id=user_id).first()
+    if user and user.role and user.role.name == role_name:
         return True
     return False
+
+
+# Function to check if the current user is an admin
+# def admin_required(f):
+#     @wraps(f)
+#     def decorated_function(*args, **kwargs):
+#         # Check if the current user is an admin
+#         if not user_has_role("admin"):
+#             return jsonify({"message": "Unauthorized access"}), 401
+#         return f(*args, **kwargs)
+
+#     return decorated_function
+
+
+# # Function to check if the current user is a moderator
+# def mod_required(f):
+#     @wraps(f)
+#     def decorated_function(*args, **kwargs):
+#         # Check if the current user is an admin or a mod
+#         if not user_has_role("admin") and not user_has_role("mod"):
+#             return jsonify({"message": "Unauthorized access"}), 401
+#         return f(*args, **kwargs)
+
+#     return decorated_function
+
+
+# # Function to check if the user has a certain role
+# def user_has_role(role_name):
+#     # Check user from current session user_id
+#     user = User.query.filter(User.id == session.get("user_id")).first()
+
+#     # Check if the user has the specified role
+#     if user and any(role.name == role_name for role in user.role):
+#         return True
+#     return False
 
 
 class AssignRoleResource(Resource):
@@ -261,6 +296,7 @@ class UsersById(Resource):
         return make_response(jsonify(user_data), 200)
 
     def patch(self, id):
+        # need to be changed for roles?
         user = User.query.get(id)
         if not user:
             return make_response({"error": "User not found"}, 404)
@@ -274,6 +310,7 @@ class UsersById(Resource):
             db.session.rollback()
             return make_response({"error": e.__str__()}, 400)
 
+    @admin_required
     def delete(self, id):
         user = User.query.get(id)
         if not user:
