@@ -3,6 +3,7 @@
 from flask import request, session, make_response, jsonify
 from flask_restful import Resource
 from functools import wraps
+from marshmallow import Schema, fields, validate, ValidationError
 
 # Local imports
 from models import db, Movie, Role, User, Club, ScreeningRoom, Post, Rating
@@ -15,6 +16,9 @@ from schemas import (
     PostSchema,
     RatingSchema,
     ClubPostSchema,
+    ScreeningRoomPostSchema,
+    RatingPostSchema,
+    PostPostSchema,
 )
 from config import app, api
 
@@ -423,19 +427,24 @@ class ScreeningRooms(Resource):
     ### make club owner only
     def post(self):
         data = request.json
-        room_schema = ScreeningRoomSchema()
         try:
-            new_room = room_schema.load(data)
-            db.session.add(new_room)
+            validated_data = ScreeningRoomPostSchema().load(data)
+        except ValidationError as e:
+            return make_response({"error": e.messages}, 400)
+
+        screening_room_schema = ScreeningRoomSchema()
+        try:
+            new_screening_room = screening_room_schema.load(validated_data)
+            db.session.add(new_screening_room)
             db.session.commit()
-            return room_schema.dump(new_room), 201
+            return screening_room_schema.dump(new_screening_room), 201
         except Exception as e:
             db.session.rollback()
-            return make_response({"error": e.__str__()}, 400)
+            return make_response({"error": str(e)}, 400)
 
 
 class ScreeningRoomsById(Resource):
-    @user_required
+    # @user_required --- not working with frontend properly
     def get(self, id):
         room = ScreeningRoom.query.filter_by(id=id).first()
         if room is None:
@@ -471,7 +480,7 @@ class ScreeningRoomsById(Resource):
 
 
 class Posts(Resource):
-    @user_required
+    # @user_required
     def get(self):
         posts = Post.query.all()
         post_schema = PostSchema(many=True)
@@ -492,7 +501,7 @@ class Posts(Resource):
 
 
 class PostsById(Resource):
-    @user_required
+    # @user_required
     def get(self, id):
         post = Post.query.filter_by(id=id).first()
         if post is None:
@@ -525,7 +534,7 @@ class PostsById(Resource):
 
 
 class Ratings(Resource):
-    @user_required
+    # @user_required
     def get(self):
         ratings = Rating.query.all()
         rating_schema = RatingSchema(many=True)
@@ -546,7 +555,7 @@ class Ratings(Resource):
 
 
 class RatingsById(Resource):
-    @user_required
+    # @user_required
     def get(self, id):
         rating = Rating.query.filter_by(id=id).first()
         if rating is None:
