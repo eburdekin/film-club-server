@@ -21,6 +21,9 @@ class MovieSchema(ma.SQLAlchemySchema):
     summary = ma.auto_field()
     trailer_link = ma.auto_field()
     streaming_availability = ma.auto_field()
+    screening_rooms = fields.Nested(
+        "ScreeningRoomSchema", many=True, only=("id", "name", "club")
+    )
 
 
 class UserSchema(ma.SQLAlchemySchema):

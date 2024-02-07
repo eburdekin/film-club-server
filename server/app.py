@@ -360,6 +360,8 @@ class UsersById(Resource):
 
 
 class Roles(Resource):
+
+    @admin_required
     def get(self):
         roles = Role.query.all()
         role_schema = RoleSchema(many=True)
@@ -447,6 +449,7 @@ class ClubsById(Resource):
 
 
 class ScreeningRooms(Resource):
+    @user_required
     def get(self):
         rooms = ScreeningRoom.query.all()
         room_schema = ScreeningRoomSchema(many=True)
