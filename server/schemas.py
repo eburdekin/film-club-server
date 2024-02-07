@@ -183,3 +183,59 @@ class ClubPostSchema(Schema):
         error_messages={"required": "Club description is required"},
     )
     public = fields.Boolean(required=True)
+
+
+class ScreeningRoomPostSchema(Schema):
+    name = fields.String(
+        required=True,
+        validate=validate.Length(
+            min=1,
+            max=50,
+            error="Screening room name length must be between 1 and 50 characters",
+        ),
+        error_messages={"required": "Screening room name is required"},
+    )
+    club_id = fields.Integer(
+        required=True,
+        error_messages={"required": "Club ID is required"},
+    )
+    movie_id = fields.Integer(
+        required=True,
+        error_messages={"required": "Movie ID is required"},
+    )
+
+
+class PostPostSchema(Schema):
+    content = fields.String(
+        required=True,
+        validate=validate.Length(
+            min=1,
+            max=300,
+            error="Post content length must be between 1 and 300 characters",
+        ),
+        error_messages={"required": "Post content is required"},
+    )
+    author_id = fields.Integer(
+        required=True,
+        error_messages={"required": "Author ID is required"},
+    )
+    screening_room_id = fields.Integer(
+        required=True,
+        error_messages={"required": "Screening room ID is required"},
+    )
+
+
+class RatingPostSchema(Schema):
+    rating = fields.Integer(
+        required=True,
+        validate=validate.Range(min=1, max=5, error="Rating must be between 1 and 5"),
+        error_messages={"required": "Rating is required"},
+    )
+    author_id = fields.Integer(
+        required=True,
+        error_messages={"required": "Author ID is required"},
+    )
+    screening_room_id = fields.Integer(
+        required=True,
+        error_messages={"required": "Screening room ID is required"},
+    )

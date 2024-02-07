@@ -71,43 +71,20 @@ def user_has_role(user_id, role_name):
     return False
 
 
-# Function to check if the current user is an admin
-# def admin_required(f):
-#     @wraps(f)
-#     def decorated_function(*args, **kwargs):
-#         # Check if the current user is an admin
-#         if not user_has_role("admin"):
-#             return jsonify({"message": "Unauthorized access"}), 401
-#         return f(*args, **kwargs)
+# can this replace wherever I have user_required?
+# @app.before_request
+# def check_if_logged_in():
+#     open_access_list = ["check_session", "movies", "clubs"]
 
-#     return decorated_function
+#     if (request.endpoint) not in open_access_list and (not session.get("user_id")):
+#         # if (request.endpoint) not in open_access_list:
+#         return {"error": "401 Unauthorized"}, 401
 
-
-# # Function to check if the current user is a moderator
-# def mod_required(f):
-#     @wraps(f)
-#     def decorated_function(*args, **kwargs):
-#         # Check if the current user is an admin or a mod
-#         if not user_has_role("admin") and not user_has_role("mod"):
-#             return jsonify({"message": "Unauthorized access"}), 401
-#         return f(*args, **kwargs)
-
-#     return decorated_function
-
-
-# # Function to check if the user has a certain role
-# def user_has_role(role_name):
-#     # Check user from current session user_id
-#     user = User.query.filter(User.id == session.get("user_id")).first()
-
-#     # Check if the user has the specified role
-#     if user and any(role.name == role_name for role in user.role):
-#         return True
-#     return False
+# User authentication, user role assignment
 
 
 class AssignRoleResource(Resource):
-    # @admin_required
+    # @admin_required --- currently breaks if this is added
     def post(self):
         data = request.get_json()
         user_id = data.get("user_id")
@@ -126,18 +103,6 @@ class AssignRoleResource(Resource):
         db.session.commit()
 
         return {"message": f"Role {role.name} assigned to user {user.username}"}, 200
-
-
-# Add the resource to the API with a specific endpoint
-api.add_resource(AssignRoleResource, "/assign_role")
-
-# @app.before_request
-# def check_if_logged_in():
-#     open_access_list = ["check_session", "movies", "clubs"]
-
-#     if (request.endpoint) not in open_access_list and (not session.get("user_id")):
-#         # if (request.endpoint) not in open_access_list:
-#         return {"error": "401 Unauthorized"}, 401
 
 
 class SignupResource(Resource):
@@ -192,7 +157,6 @@ class LoginResource(Resource):
 
 
 class CheckSession(Resource):
-
     def get(self):
         user = User.query.filter(User.id == session.get("user_id")).first()
         if user:
@@ -204,12 +168,12 @@ class CheckSession(Resource):
 
 
 class Logout(Resource):
-
-    def delete(self):  # just add this line!
+    def delete(self):
         session.clear()
         return {"message": "204: No Content"}, 204
 
 
+api.add_resource(AssignRoleResource, "/assign_role")
 api.add_resource(SignupResource, "/signup")
 api.add_resource(LoginResource, "/login")
 api.add_resource(CheckSession, "/check_session")
@@ -471,6 +435,7 @@ class ScreeningRooms(Resource):
 
 
 class ScreeningRoomsById(Resource):
+    @user_required
     def get(self, id):
         room = ScreeningRoom.query.filter_by(id=id).first()
         if room is None:
@@ -506,6 +471,7 @@ class ScreeningRoomsById(Resource):
 
 
 class Posts(Resource):
+    @user_required
     def get(self):
         posts = Post.query.all()
         post_schema = PostSchema(many=True)
@@ -526,6 +492,7 @@ class Posts(Resource):
 
 
 class PostsById(Resource):
+    @user_required
     def get(self, id):
         post = Post.query.filter_by(id=id).first()
         if post is None:
@@ -558,6 +525,7 @@ class PostsById(Resource):
 
 
 class Ratings(Resource):
+    @user_required
     def get(self):
         ratings = Rating.query.all()
         rating_schema = RatingSchema(many=True)
@@ -578,6 +546,7 @@ class Ratings(Resource):
 
 
 class RatingsById(Resource):
+    @user_required
     def get(self, id):
         rating = Rating.query.filter_by(id=id).first()
         if rating is None:
