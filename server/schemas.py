@@ -91,6 +91,14 @@ class ScreeningRoomSchema(ma.SQLAlchemySchema):
     movie_id = ma.auto_field()
     club = fields.Nested("ClubSchema", only=("id", "name"))
     movie = fields.Nested("MovieSchema", only=("id", "title"))
+    posts = fields.Nested(
+        "PostSchema",
+        many=True,
+    )
+    ratings = fields.Nested(
+        "RatingSchema",
+        many=True,
+    )
 
 
 class PostSchema(ma.SQLAlchemySchema):
