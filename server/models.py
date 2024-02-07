@@ -1,8 +1,5 @@
-# from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.ext.hybrid import hybrid_property
 from config import db, bcrypt
-
-# from sqlalchemy_serializer import SerializerMixin
 
 club_members = db.Table(
     "club_members",
@@ -82,8 +79,6 @@ class User(db.Model):
 
     role_id = db.Column(db.Integer, db.ForeignKey("roles.id"))
     role = db.relationship("Role", backref="user", uselist=False)
-
-    # serialize_rules = ("-posts.user", "-ratings.user")
 
     # Define relationship to clubs
     # clubs = db.relationship(

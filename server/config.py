@@ -16,8 +16,6 @@ from flask_cors import CORS
 
 # from flask_jwt_extended import JWTManager, jwt_required, create_access_token
 
-# from models import db, Movie, User, Club, ScreeningRoom, Post, Rating
-
 app = Flask(__name__)
 # need to make this private
 app.secret_key = "ErrD76SEpKMDMcq71y4WfqnsZRDogwU3yZs6dKr0S2M4tHaA0KksY585UWR3psX"

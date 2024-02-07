@@ -19,7 +19,7 @@ from schemas import (
 from config import app, api
 
 
-# Authentication
+# Control access via user roles
 
 
 def admin_required(f):
@@ -274,17 +274,18 @@ class Users(Resource):
         users_data = user_schema.dump(users)
         return make_response(jsonify(users_data), 200)
 
-    def post(self):
-        data = request.json
-        user_schema = UserSchema()
-        try:
-            new_user = user_schema.load(data)
-            db.session.add(new_user)
-            db.session.commit()
-            return user_schema.dump(new_user), 201
-        except Exception as e:
-            db.session.rollback()
-            return make_response({"error": e.__str__()}, 400)
+    # signup is what posts new users -- don't need below
+    # def post(self):
+    #     data = request.json
+    #     user_schema = UserSchema()
+    #     try:
+    #         new_user = user_schema.load(data)
+    #         db.session.add(new_user)
+    #         db.session.commit()
+    #         return user_schema.dump(new_user), 201
+    #     except Exception as e:
+    #         db.session.rollback()
+    #         return make_response({"error": e.__str__()}, 400)
 
 
 class UsersById(Resource):
@@ -313,26 +314,26 @@ class UsersById(Resource):
     #         return make_response({"error": e.__str__()}, 400)
 
     # @admin_required
-    def patch(self, id):
-        user = User.query.get(id)
-        if not user:
-            return jsonify({"error": "User not found"}), 404
+    # def patch(self, id):
+    #     user = User.query.get(id)
+    #     if not user:
+    #         return jsonify({"error": "User not found"}), 404
 
-        data = request.json
-        # Ensure that only the allowed fields are updated
-        allowed_fields = ["username", "email", "role"]
-        for field in allowed_fields:
-            if field in data:
-                setattr(user, field, data[field])
+    #     data = request.json
+    #     # Ensure that only the allowed fields are updated
+    #     allowed_fields = ["username", "email", "role"]
+    #     for field in allowed_fields:
+    #         if field in data:
+    #             setattr(user, field, data[field])
 
-        try:
-            db.session.commit()
-            user_schema = UserSchema()
-            updated_user = user_schema.dump(user)
-            return jsonify(updated_user), 200
-        except Exception as e:
-            db.session.rollback()
-            return jsonify({"error": str(e)}), 400
+    #     try:
+    #         db.session.commit()
+    #         user_schema = UserSchema()
+    #         updated_user = user_schema.dump(user)
+    #         return jsonify(updated_user), 200
+    #     except Exception as e:
+    #         db.session.rollback()
+    #         return jsonify({"error": str(e)}), 400
 
     @admin_required
     def delete(self, id):
@@ -351,17 +352,17 @@ class Roles(Resource):
         roles_data = role_schema.dump(roles)
         return make_response(jsonify(roles_data), 200)
 
-    def post(self):
-        data = request.json
-        role_schema = RoleSchema()
-        try:
-            new_role = role_schema.load(data)
-            db.session.add(new_role)
-            db.session.commit()
-            return role_schema.dump(new_role), 201
-        except Exception as e:
-            db.session.rollback()
-            return make_response({"error": e.__str__()}, 400)
+    # def post(self):
+    #     data = request.json
+    #     role_schema = RoleSchema()
+    #     try:
+    #         new_role = role_schema.load(data)
+    #         db.session.add(new_role)
+    #         db.session.commit()
+    #         return role_schema.dump(new_role), 201
+    #     except Exception as e:
+    #         db.session.rollback()
+    #         return make_response({"error": e.__str__()}, 400)
 
 
 class Clubs(Resource):
