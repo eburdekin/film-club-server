@@ -267,6 +267,7 @@ class MoviesById(Resource):
 
 
 class Users(Resource):
+    @admin_required
     def get(self):
         users = User.query.all()
         user_schema = UserSchema(many=True)
@@ -287,6 +288,7 @@ class Users(Resource):
 
 
 class UsersById(Resource):
+    @admin_required
     def get(self, id):
         user = User.query.filter_by(id=id).first()
         if user is None:
@@ -295,20 +297,42 @@ class UsersById(Resource):
         user_data = user_schema.dump(user)
         return make_response(jsonify(user_data), 200)
 
+    # def patch(self, id):
+    #     # need to be changed for roles?
+    #     user = User.query.get(id)
+    #     if not user:
+    #         return make_response({"error": "User not found"}, 404)
+    #     data = request.json
+    #     user_schema = UserSchema()
+    #     try:
+    #         updated_user = user_schema.load(data, instance=user, partial=True)
+    #         db.session.commit()
+    #         return user_schema.dump(updated_user), 200
+    #     except Exception as e:
+    #         db.session.rollback()
+    #         return make_response({"error": e.__str__()}, 400)
+
+    # @admin_required
     def patch(self, id):
-        # need to be changed for roles?
         user = User.query.get(id)
         if not user:
-            return make_response({"error": "User not found"}, 404)
+            return jsonify({"error": "User not found"}), 404
+
         data = request.json
-        user_schema = UserSchema()
+        # Ensure that only the allowed fields are updated
+        allowed_fields = ["username", "email", "role"]
+        for field in allowed_fields:
+            if field in data:
+                setattr(user, field, data[field])
+
         try:
-            updated_user = user_schema.load(data, instance=user, partial=True)
             db.session.commit()
-            return user_schema.dump(updated_user), 200
+            user_schema = UserSchema()
+            updated_user = user_schema.dump(user)
+            return jsonify(updated_user), 200
         except Exception as e:
             db.session.rollback()
-            return make_response({"error": e.__str__()}, 400)
+            return jsonify({"error": str(e)}), 400
 
     @admin_required
     def delete(self, id):
