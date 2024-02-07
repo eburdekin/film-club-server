@@ -54,20 +54,6 @@ def mod_required(f):
     return decorated_function
 
 
-def user_required(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        user_id = session.get("user_id")
-        if user_id:
-            user_roles = ["admin", "mod", "user"]
-            if not any(user_has_role(user_id, role) for role in user_roles):
-                return {"message": "Unauthorized access"}, 401
-            return f(*args, **kwargs)
-        return {"message": "User not logged in"}, 401
-
-    return decorated_function
-
-
 def user_has_role(user_id, role_name):
     user = User.query.filter_by(id=user_id).first()
     if user and user.role and user.role.name == role_name:
@@ -75,14 +61,14 @@ def user_has_role(user_id, role_name):
     return False
 
 
-# can this replace wherever I have user_required?
 # @app.before_request
 # def check_if_logged_in():
-#     open_access_list = ["check_session", "movies", "clubs"]
+#     open_access_list = ["signup", "login", "check_session", "movies", "clubs"]
 
 #     if (request.endpoint) not in open_access_list and (not session.get("user_id")):
 #         # if (request.endpoint) not in open_access_list:
 #         return {"error": "401 Unauthorized"}, 401
+
 
 # User authentication, user role assignment
 
@@ -417,7 +403,7 @@ class ClubsById(Resource):
 
 
 class ScreeningRooms(Resource):
-    @user_required
+    # @user_required
     def get(self):
         rooms = ScreeningRoom.query.all()
         room_schema = ScreeningRoomSchema(many=True)
