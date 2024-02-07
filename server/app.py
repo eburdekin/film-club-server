@@ -28,9 +28,9 @@ def admin_required(f):
         user_id = session.get("user_id")
         if user_id:
             if not user_has_role(user_id, "admin"):
-                return jsonify({"message": "Unauthorized access"}), 401
+                return {"message": "Unauthorized access"}, 401
             return f(*args, **kwargs)
-        return jsonify({"message": "User not logged in"}), 401
+        return {"message": "User not logged in"}, 401
 
     return decorated_function
 
@@ -43,9 +43,23 @@ def mod_required(f):
             if not user_has_role(user_id, "admin") and not user_has_role(
                 user_id, "mod"
             ):
-                return jsonify({"message": "Unauthorized access"}), 401
+                return {"message": "Unauthorized access"}, 401
             return f(*args, **kwargs)
-        return jsonify({"message": "User not logged in"}), 401
+        return {"message": "User not logged in"}, 401
+
+    return decorated_function
+
+
+def user_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        user_id = session.get("user_id")
+        if user_id:
+            user_roles = ["admin", "mod", "user"]
+            if not any(user_has_role(user_id, role) for role in user_roles):
+                return {"message": "Unauthorized access"}, 401
+            return f(*args, **kwargs)
+        return {"message": "User not logged in"}, 401
 
     return decorated_function
 
@@ -174,7 +188,7 @@ class LoginResource(Resource):
 
         session["user_id"] = user_id
 
-        return {"msg": serialized_user}, 200
+        return serialized_user, 200
 
 
 class CheckSession(Resource):
