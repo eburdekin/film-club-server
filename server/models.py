@@ -124,7 +124,6 @@ class Club(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, unique=True, nullable=False)
     description = db.Column(db.String)
-    public = db.Column(db.Boolean)
     # owner_id = db.Column(db.Integer, db.ForeignKey("users.id"))
 
     # owner = db.relationship("User", backref="clubs_owned")
@@ -132,11 +131,10 @@ class Club(db.Model):
 
     screening_rooms = db.relationship("ScreeningRoom", backref="club")
 
-    def __init__(self, name, public, description=None, owner_id=None):
+    def __init__(self, name, description=None):
         self.name = name
         self.description = description
-        self.public = public
-        self.owner_id = owner_id
+        # self.owner_id = owner_id
 
     def __repr__(self):
         return f"<Club {self.name}, id # {self.id}>"

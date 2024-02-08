@@ -367,6 +367,52 @@ class Clubs(Resource):
     #     pass
 
 
+class AddUserToClub(Resource):
+    def post(self, club_id):
+        data = request.get_json()
+        user_id = data.get("user_id")
+
+        if not user_id:
+            return {"error": "User ID is required"}, 400
+
+        club = Club.query.get(club_id)
+        user = User.query.get(user_id)
+
+        if not club or not user:
+            return {"error": "Club or User not found"}, 404
+
+        club.members.append(user)
+        db.session.commit()
+
+        return {"message": f"User {user_id} added to club {club_id}"}, 200
+
+
+class RemoveUserFromClub(Resource):
+    def post(self, club_id):
+        data = request.get_json()
+        user_id = data.get("user_id")
+
+        if not user_id:
+            return {"error": "User ID is required"}, 400
+
+        club = Club.query.get(club_id)
+        user = User.query.get(user_id)
+
+        if not club or not user:
+            return {"error": "Club or User not found"}, 404
+
+        if user in club.members:
+            club.members.remove(user)
+            db.session.commit()
+            return {"message": f"User {user_id} removed from club {club_id}"}, 200
+        else:
+            return {"error": f"User {user_id} is not a member of club {club_id}"}, 400
+
+
+api.add_resource(AddUserToClub, "/clubs/<int:club_id>/add_user")
+api.add_resource(RemoveUserFromClub, "/clubs/<int:club_id>/remove_user")
+
+
 class ClubsById(Resource):
     def get(self, id):
         club = Club.query.filter_by(id=id).first()

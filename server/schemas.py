@@ -73,7 +73,6 @@ class ClubSchema(ma.SQLAlchemySchema):
     id = ma.auto_field()
     name = ma.auto_field()
     description = ma.auto_field()
-    public = ma.auto_field()
     screening_rooms = fields.Nested(
         "ScreeningRoomSchema", many=True, only=("id", "name", "movie")
     )
@@ -186,7 +185,6 @@ class ClubPostSchema(Schema):
         ),
         error_messages={"required": "Club description is required"},
     )
-    public = fields.Boolean(required=True)
 
 
 class ScreeningRoomPostSchema(Schema):
