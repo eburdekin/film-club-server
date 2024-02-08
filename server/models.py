@@ -13,6 +13,12 @@ club_members = db.Table(
 #     db.Column("role_id", db.Integer, db.ForeignKey("roles.id"), primary_key=True),
 # )
 
+# movie_genre = db.Table(
+#     "movie_genre",
+#     db.Column("movie_id", db.Integer, db.ForeignKey("movies.id"), primary_key=True),
+#     db.Column("genre_id", db.Integer, db.ForeignKey("genres.id"), primary_key=True),
+# )
+
 
 class Movie(db.Model):
     __tablename__ = "movies"
@@ -21,12 +27,7 @@ class Movie(db.Model):
     title = db.Column(db.String, nullable=False)
     release_date = db.Column(db.String)
     poster_image = db.Column(db.String)
-    genres = db.Column(db.String)
-    director = db.Column(db.String)
-    cast = db.Column(db.String)
-    summary = db.Column(db.String)
-    trailer_link = db.Column(db.String)
-    streaming_availability = db.Column(db.String)
+    # genres = db.relationship("Genre", secondary="movie_genre", backref="movies")
     screening_rooms = db.relationship("ScreeningRoom", backref="movie")
 
     def __init__(
@@ -34,25 +35,31 @@ class Movie(db.Model):
         title,
         release_date=None,
         poster_image=None,
-        genres=None,
-        director=None,
-        cast=None,
-        summary=None,
-        trailer_link=None,
-        streaming_availability=None,
+        # genres=None,
     ):
         self.title = title
         self.release_date = release_date
         self.poster_image = poster_image
-        self.genres = genres
-        self.director = director
-        self.cast = cast
-        self.summary = summary
-        self.trailer_link = trailer_link
-        self.streaming_availability = streaming_availability
+        # if genres is None:
+        #     self.genres = []
+        # else:
+        #     self.genres = genres
 
     def __repr__(self):
         return f"<Movie {self.title}, id # {self.id}>"
+
+
+# class Genre(db.Model):
+#     __tablename__ = "genres"
+
+#     id = db.Column(db.Integer, primary_key=True)
+#     name = db.Column(db.String, unique=True, nullable=False)
+
+#     def __init__(self, name):
+#         self.name = name
+
+#     def __repr__(self):
+#         return f"<Genre {self.name}, id # {self.id}>"
 
 
 class Role(db.Model):

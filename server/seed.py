@@ -17,25 +17,49 @@ with app.app_context():
     Role.query.delete()
     Club.query.delete()
     ScreeningRoom.query.delete()
-    Post.query.delete()
-    Rating.query.delete()
+    # Post.query.delete()
+    # Rating.query.delete()
 
-    print("Seeding movie data...")
-    url = f"https://api.themoviedb.org/3/movie/popular?api_key={TMDB_API_KEY}"
-    response = requests.get(url)
+    # print("Seeding movie data...")
 
-    if response.status_code == 200:
-        data = response.json()
+    # page = 1
+    # total_pages = min(50, float("inf"))  # Set the total_pages to a maximum of 500
 
-    # Extract and insert movie data into the database
-    for movie_data in data.get("results", []):
-        movie = Movie(
-            title=movie_data.get("title"),
-            release_date=movie_data.get("release_date"),
-            poster_image=movie_data.get("poster_path"),
-            # Extract other relevant fields as needed
-        )
-        db.session.add(movie)
+    # while page <= total_pages:
+    #     url = f"https://api.themoviedb.org/3/discover/movie"
+    #     params = {
+    #         "api_key": TMDB_API_KEY,
+    #         "language": "en-US",
+    #         "sort_by": "popularity.desc",
+    #         "include_adult": "false",
+    #         "include_video": "false",
+    #         "page": page,
+    #     }
+    #     response = requests.get(url, params=params)
+
+    #     if response.status_code == 200:
+    #         data = response.json()
+    #         total_pages = min(
+    #             data.get("total_pages", 0), 50
+    #         )  # Update total_pages with a maximum of 500
+
+    #         # Extract and insert movie data into the database
+    #         for movie_data in data.get("results", []):
+    #             movie = Movie(
+    #                 title=movie_data.get("title"),
+    #                 release_date=movie_data.get("release_date"),
+    #                 poster_image=movie_data.get("poster_path"),
+    #                 # Extract other relevant fields as needed
+    #             )
+    #             db.session.add(movie)
+
+    #         db.session.commit()  # Committing after each page ensures data integrity
+
+    #         print(f"Processed page {page}/{total_pages}")
+    #         page += 1
+    #     else:
+    #         print(f"Failed to retrieve data from page {page}")
+    #         break
 
     print("Seeding user roles...")
     role1 = Role(name="user")

@@ -475,15 +475,20 @@ class Posts(Resource):
 
     def post(self):
         data = request.json
+        try:
+            validated_data = PostPostSchema().load(data)
+        except ValidationError as e:
+            return make_response({"error": e.messages}, 400)
+
         post_schema = PostSchema()
         try:
-            new_post = post_schema.load(data)
+            new_post = post_schema.load(validated_data)
             db.session.add(new_post)
             db.session.commit()
             return post_schema.dump(new_post), 201
         except Exception as e:
             db.session.rollback()
-            return make_response({"error": e.__str__()}, 400)
+            return make_response({"error": str(e)}, 400)
 
 
 class PostsById(Resource):
@@ -529,15 +534,20 @@ class Ratings(Resource):
 
     def post(self):
         data = request.json
+        try:
+            validated_data = RatingPostSchema().load(data)
+        except ValidationError as e:
+            return make_response({"error": e.messages}, 400)
+
         rating_schema = RatingSchema()
         try:
-            new_rating = rating_schema.load(data)
+            new_rating = rating_schema.load(validated_data)
             db.session.add(new_rating)
             db.session.commit()
             return rating_schema.dump(new_rating), 201
         except Exception as e:
             db.session.rollback()
-            return make_response({"error": e.__str__()}, 400)
+            return make_response({"error": str(e)}, 400)
 
 
 class RatingsById(Resource):

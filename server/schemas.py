@@ -15,15 +15,19 @@ class MovieSchema(ma.SQLAlchemySchema):
     title = ma.auto_field()
     release_date = ma.auto_field()
     poster_image = ma.auto_field()
-    genres = ma.auto_field()
-    director = ma.auto_field()
-    cast = ma.auto_field()
-    summary = ma.auto_field()
-    trailer_link = ma.auto_field()
-    streaming_availability = ma.auto_field()
+    # genres = fields.Nested("GenreSchema", many=True, only=("id", "name"))
     screening_rooms = fields.Nested(
         "ScreeningRoomSchema", many=True, only=("id", "name", "club")
     )
+
+
+# class GenreSchema(ma.SQLAlchemySchema):
+#     class Meta:
+#         model = Genre
+#         load_instance = True
+
+#     id = ma.auto_field()
+#     name = ma.auto_field()
 
 
 class UserSchema(ma.SQLAlchemySchema):
@@ -211,7 +215,7 @@ class PostPostSchema(Schema):
         validate=validate.Length(
             min=1,
             max=300,
-            error="Post content length must be between 1 and 300 characters",
+            error="Post content length must be between 1 and 200 characters",
         ),
         error_messages={"required": "Post content is required"},
     )
