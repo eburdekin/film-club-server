@@ -475,6 +475,36 @@ class ScreeningRooms(Resource):
             return make_response({"error": str(e)}, 400)
 
 
+class AddRoomToClub(Resource):
+    def post(self, club_id):
+        data = request.json
+        try:
+            validated_data = ScreeningRoomPostSchema().load(data)
+        except ValidationError as e:
+            return make_response({"error": e.messages}, 400)
+
+        club = Club.query.get(club_id)
+        if not club:
+            return make_response({"error": "Club not found"}, 404)
+
+        screening_room_schema = ScreeningRoomSchema()
+        try:
+            new_screening_room = ScreeningRoom(
+                name=validated_data["name"],
+                club_id=club_id,
+                movie_id=validated_data["movie_id"],
+            )
+            db.session.add(new_screening_room)
+            db.session.commit()
+            return screening_room_schema.dump(new_screening_room), 201
+        except Exception as e:
+            db.session.rollback()
+            return make_response({"error": str(e)}, 400)
+
+
+api.add_resource(AddRoomToClub, "/clubs/<int:club_id>/screening_rooms/new")
+
+
 class ScreeningRoomsById(Resource):
     # @user_required --- not working with frontend properly
     def get(self, id):
