@@ -490,7 +490,6 @@ class AddRoomToClub(Resource):
         screening_room_schema = ScreeningRoomSchema()
         try:
             new_screening_room = ScreeningRoom(
-                name=validated_data["name"],
                 club_id=club_id,
                 movie_id=validated_data["movie_id"],
             )

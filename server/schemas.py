@@ -17,7 +17,7 @@ class MovieSchema(ma.SQLAlchemySchema):
     poster_image = ma.auto_field()
     # genres = fields.Nested("GenreSchema", many=True, only=("id", "name"))
     screening_rooms = fields.Nested(
-        "ScreeningRoomSchema", many=True, only=("id", "name", "club")
+        "ScreeningRoomSchema", many=True, only=("id", "club")
     )
 
 
@@ -74,7 +74,7 @@ class ClubSchema(ma.SQLAlchemySchema):
     name = ma.auto_field()
     description = ma.auto_field()
     screening_rooms = fields.Nested(
-        "ScreeningRoomSchema", many=True, only=("id", "name", "movie")
+        "ScreeningRoomSchema", many=True, only=("id", "movie")
     )
     members = fields.Nested(
         "UserSchema",
@@ -92,7 +92,7 @@ class ScreeningRoomSchema(ma.SQLAlchemySchema):
         load_instance = True
 
     id = ma.auto_field()
-    name = ma.auto_field()
+    # name = ma.auto_field()
     club_id = ma.auto_field()
     movie_id = ma.auto_field()
     club = fields.Nested("ClubSchema", only=("id", "name"))
@@ -125,10 +125,7 @@ class PostSchema(ma.SQLAlchemySchema):
     screening_room_id = ma.auto_field()
     screening_room = fields.Nested(
         "ScreeningRoomSchema",
-        only=(
-            "id",
-            "name",
-        ),
+        only=("id",),
     )
     timestamp = ma.auto_field()
     movie = fields.Nested(
@@ -154,10 +151,7 @@ class RatingSchema(ma.SQLAlchemySchema):
     screening_room_id = ma.auto_field()
     screening_room = fields.Nested(
         "ScreeningRoomSchema",
-        only=(
-            "id",
-            "name",
-        ),
+        only=("id",),
     )
     timestamp = ma.auto_field()
     movie = fields.Nested(
@@ -188,15 +182,15 @@ class ClubPostSchema(Schema):
 
 
 class ScreeningRoomPostSchema(Schema):
-    name = fields.String(
-        required=True,
-        validate=validate.Length(
-            min=1,
-            max=50,
-            error="Screening room name length must be between 1 and 50 characters",
-        ),
-        error_messages={"required": "Screening room name is required"},
-    )
+    # name = fields.String(
+    #     required=True,
+    #     validate=validate.Length(
+    #         min=1,
+    #         max=50,
+    #         error="Screening room name length must be between 1 and 50 characters",
+    #     ),
+    #     error_messages={"required": "Screening room name is required"},
+    # )
     club_id = fields.Integer(
         required=True,
         error_messages={"required": "Club ID is required"},

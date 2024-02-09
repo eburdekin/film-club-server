@@ -144,7 +144,7 @@ class ScreeningRoom(db.Model):
     __tablename__ = "screening_rooms"
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String)
+    # name = db.Column(db.String)
     club_id = db.Column(db.Integer, db.ForeignKey("clubs.id"))
     movie_id = db.Column(db.Integer, db.ForeignKey("movies.id"))
 
@@ -156,16 +156,16 @@ class ScreeningRoom(db.Model):
 
     def __init__(
         self,
-        name,
+        # name,
         club_id,
         movie_id,
     ):
-        self.name = name
+        # self.name = name
         self.club_id = club_id
         self.movie_id = movie_id
 
     def __repr__(self):
-        return f"<Screening Room {self.name}, id # {self.id}>"
+        return f"<Screening Room id # {self.id}>"
 
 
 class Post(db.Model):
