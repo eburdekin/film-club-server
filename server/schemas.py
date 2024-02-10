@@ -15,6 +15,7 @@ class MovieSchema(ma.SQLAlchemySchema):
     title = ma.auto_field()
     release_date = ma.auto_field()
     poster_image = ma.auto_field()
+    popularity = ma.auto_field()
     genres = fields.Nested("GenreSchema", many=True, only=("name",))
     screening_rooms = fields.Nested(
         "ScreeningRoomSchema", many=True, only=("id", "club")
