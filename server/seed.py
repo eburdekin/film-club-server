@@ -14,7 +14,7 @@ with app.app_context():
     # User.query.delete()
     # Role.query.delete()
     Movie.query.delete()
-    # Genre.query.delete()
+    Genre.query.delete()
     Club.query.delete()
     ScreeningRoom.query.delete()
     Post.query.delete()
@@ -23,7 +23,7 @@ with app.app_context():
     print("Seeding movie data...")
 
     page = 1
-    total_pages = min(50, float("inf"))  # Set the total_pages to a maximum of 500
+    total_pages = min(25, float("inf"))  # Set the total_pages to a maximum of 500
 
     while page <= total_pages:
         url = f"https://api.themoviedb.org/3/discover/movie"
@@ -40,7 +40,7 @@ with app.app_context():
         if response.status_code == 200:
             data = response.json()
             total_pages = min(
-                data.get("total_pages", 0), 50
+                data.get("total_pages", 0), 25
             )  # Update total_pages with a maximum of 500
 
             # Extract and insert movie data into the database
@@ -76,50 +76,50 @@ with app.app_context():
 
     # db.session.add_all(roles)
 
-    # print("Seeding genres...")
-    # genre1 = Genre(id=28, name="Action")
-    # genre2 = Genre(id=12, name="Adventure")
-    # genre3 = Genre(id=16, name="Animation")
-    # genre4 = Genre(id=35, name="Comedy")
-    # genre5 = Genre(id=80, name="Crime")
-    # genre6 = Genre(id=99, name="Documentary")
-    # genre7 = Genre(id=18, name="Drama")
-    # genre8 = Genre(id=10751, name="Family")
-    # genre9 = Genre(id=14, name="Fantasy")
-    # genre10 = Genre(id=36, name="History")
-    # genre11 = Genre(id=27, name="Horror")
-    # genre12 = Genre(id=10402, name="Music")
-    # genre13 = Genre(id=9648, name="Mystery")
-    # genre14 = Genre(id=10749, name="Romance")
-    # genre15 = Genre(id=878, name="Science Fiction")
-    # genre16 = Genre(id=10770, name="TV Movie")
-    # genre17 = Genre(id=53, name="Thriller")
-    # genre18 = Genre(id=10752, name="War")
-    # genre19 = Genre(id=37, name="Western")
+    print("Seeding genres...")
+    genre1 = Genre(id=28, name="Action")
+    genre2 = Genre(id=12, name="Adventure")
+    genre3 = Genre(id=16, name="Animation")
+    genre4 = Genre(id=35, name="Comedy")
+    genre5 = Genre(id=80, name="Crime")
+    genre6 = Genre(id=99, name="Documentary")
+    genre7 = Genre(id=18, name="Drama")
+    genre8 = Genre(id=10751, name="Family")
+    genre9 = Genre(id=14, name="Fantasy")
+    genre10 = Genre(id=36, name="History")
+    genre11 = Genre(id=27, name="Horror")
+    genre12 = Genre(id=10402, name="Music")
+    genre13 = Genre(id=9648, name="Mystery")
+    genre14 = Genre(id=10749, name="Romance")
+    genre15 = Genre(id=878, name="Science Fiction")
+    genre16 = Genre(id=10770, name="TV Movie")
+    genre17 = Genre(id=53, name="Thriller")
+    genre18 = Genre(id=10752, name="War")
+    genre19 = Genre(id=37, name="Western")
 
-    # genres = [
-    #     genre1,
-    #     genre2,
-    #     genre3,
-    #     genre4,
-    #     genre5,
-    #     genre6,
-    #     genre7,
-    #     genre8,
-    #     genre9,
-    #     genre10,
-    #     genre11,
-    #     genre12,
-    #     genre13,
-    #     genre14,
-    #     genre15,
-    #     genre16,
-    #     genre17,
-    #     genre18,
-    #     genre19,
-    # ]
+    genres = [
+        genre1,
+        genre2,
+        genre3,
+        genre4,
+        genre5,
+        genre6,
+        genre7,
+        genre8,
+        genre9,
+        genre10,
+        genre11,
+        genre12,
+        genre13,
+        genre14,
+        genre15,
+        genre16,
+        genre17,
+        genre18,
+        genre19,
+    ]
 
-    # db.session.add_all(genres)
+    db.session.add_all(genres)
 
     print("Seeding film club data...")
     club1 = Club(
