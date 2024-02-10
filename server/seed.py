@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from config import app, db
-from models import User, Role, Movie, Club, ScreeningRoom, Post, Rating
+from models import User, Role, Movie, Genre, Club, ScreeningRoom, Post, Rating
 
 # import requests for tMDB API call
 import requests
@@ -13,53 +13,59 @@ with app.app_context():
     print("Deleting existing data...")
     # User.query.delete()
     # Role.query.delete()
-    # Movie.query.delete()
-    # Role.query.delete()
+    Movie.query.delete()
+    # Genre.query.delete()
     Club.query.delete()
     ScreeningRoom.query.delete()
     Post.query.delete()
     Rating.query.delete()
 
-    # print("Seeding movie data...")
+    print("Seeding movie data...")
 
-    # page = 1
-    # total_pages = min(50, float("inf"))  # Set the total_pages to a maximum of 500
+    page = 1
+    total_pages = min(50, float("inf"))  # Set the total_pages to a maximum of 500
 
-    # while page <= total_pages:
-    #     url = f"https://api.themoviedb.org/3/discover/movie"
-    #     params = {
-    #         "api_key": TMDB_API_KEY,
-    #         "language": "en-US",
-    #         "sort_by": "popularity.desc",
-    #         "include_adult": "false",
-    #         "include_video": "false",
-    #         "page": page,
-    #     }
-    #     response = requests.get(url, params=params)
+    while page <= total_pages:
+        url = f"https://api.themoviedb.org/3/discover/movie"
+        params = {
+            "api_key": TMDB_API_KEY,
+            "language": "en-US",
+            "sort_by": "popularity.desc",
+            "include_adult": "false",
+            "include_video": "false",
+            "page": page,
+        }
+        response = requests.get(url, params=params)
 
-    #     if response.status_code == 200:
-    #         data = response.json()
-    #         total_pages = min(
-    #             data.get("total_pages", 0), 50
-    #         )  # Update total_pages with a maximum of 500
+        if response.status_code == 200:
+            data = response.json()
+            total_pages = min(
+                data.get("total_pages", 0), 50
+            )  # Update total_pages with a maximum of 500
 
-    #         # Extract and insert movie data into the database
-    #         for movie_data in data.get("results", []):
-    #             movie = Movie(
-    #                 title=movie_data.get("title"),
-    #                 release_date=movie_data.get("release_date"),
-    #                 poster_image=movie_data.get("poster_path"),
-    #                 # Extract other relevant fields as needed
-    #             )
-    #             db.session.add(movie)
+            # Extract and insert movie data into the database
+            for movie_data in data.get("results", []):
 
-    #         db.session.commit()  # Committing after each page ensures data integrity
+                genre_ids = movie_data.get("genre_ids", [])
+                genres = Genre.query.filter(Genre.id.in_(genre_ids)).all()
 
-    #         print(f"Processed page {page}/{total_pages}")
-    #         page += 1
-    #     else:
-    #         print(f"Failed to retrieve data from page {page}")
-    #         break
+                movie = Movie(
+                    title=movie_data.get("title"),
+                    release_date=movie_data.get("release_date"),
+                    poster_image=movie_data.get("poster_path"),
+                    popularity=movie_data.get("popularity"),
+                    genres=genres,
+                    # Extract other relevant fields as needed
+                )
+                db.session.add(movie)
+
+            db.session.commit()  # Committing after each page ensures data integrity
+
+            print(f"Processed page {page}/{total_pages}")
+            page += 1
+        else:
+            print(f"Failed to retrieve data from page {page}")
+            break
 
     # print("Seeding user roles...")
     # role1 = Role(name="user")
@@ -69,6 +75,51 @@ with app.app_context():
     # roles = [role1, role2, role3]
 
     # db.session.add_all(roles)
+
+    # print("Seeding genres...")
+    # genre1 = Genre(id=28, name="Action")
+    # genre2 = Genre(id=12, name="Adventure")
+    # genre3 = Genre(id=16, name="Animation")
+    # genre4 = Genre(id=35, name="Comedy")
+    # genre5 = Genre(id=80, name="Crime")
+    # genre6 = Genre(id=99, name="Documentary")
+    # genre7 = Genre(id=18, name="Drama")
+    # genre8 = Genre(id=10751, name="Family")
+    # genre9 = Genre(id=14, name="Fantasy")
+    # genre10 = Genre(id=36, name="History")
+    # genre11 = Genre(id=27, name="Horror")
+    # genre12 = Genre(id=10402, name="Music")
+    # genre13 = Genre(id=9648, name="Mystery")
+    # genre14 = Genre(id=10749, name="Romance")
+    # genre15 = Genre(id=878, name="Science Fiction")
+    # genre16 = Genre(id=10770, name="TV Movie")
+    # genre17 = Genre(id=53, name="Thriller")
+    # genre18 = Genre(id=10752, name="War")
+    # genre19 = Genre(id=37, name="Western")
+
+    # genres = [
+    #     genre1,
+    #     genre2,
+    #     genre3,
+    #     genre4,
+    #     genre5,
+    #     genre6,
+    #     genre7,
+    #     genre8,
+    #     genre9,
+    #     genre10,
+    #     genre11,
+    #     genre12,
+    #     genre13,
+    #     genre14,
+    #     genre15,
+    #     genre16,
+    #     genre17,
+    #     genre18,
+    #     genre19,
+    # ]
+
+    # db.session.add_all(genres)
 
     print("Seeding film club data...")
     club1 = Club(

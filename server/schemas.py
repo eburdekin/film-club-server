@@ -1,4 +1,4 @@
-from models import db, Movie, User, Role, Club, ScreeningRoom, Post, Rating
+from models import db, Movie, Genre, User, Role, Club, ScreeningRoom, Post, Rating
 from config import ma
 
 from marshmallow import Schema, fields, validate, ValidationError
@@ -15,19 +15,19 @@ class MovieSchema(ma.SQLAlchemySchema):
     title = ma.auto_field()
     release_date = ma.auto_field()
     poster_image = ma.auto_field()
-    # genres = fields.Nested("GenreSchema", many=True, only=("id", "name"))
+    genres = fields.Nested("GenreSchema", many=True, only=("name",))
     screening_rooms = fields.Nested(
         "ScreeningRoomSchema", many=True, only=("id", "club")
     )
 
 
-# class GenreSchema(ma.SQLAlchemySchema):
-#     class Meta:
-#         model = Genre
-#         load_instance = True
+class GenreSchema(ma.SQLAlchemySchema):
+    class Meta:
+        model = Genre
+        load_instance = True
 
-#     id = ma.auto_field()
-#     name = ma.auto_field()
+    id = ma.auto_field()
+    name = ma.auto_field()
 
 
 class UserSchema(ma.SQLAlchemySchema):
