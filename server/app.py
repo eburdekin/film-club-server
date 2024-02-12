@@ -1,6 +1,6 @@
 # #!/usr/bin/env python3
 
-from flask import request, session, make_response, jsonify
+from flask import request, session, make_response, jsonify, render_template
 from flask_restful import Resource
 from functools import wraps
 from marshmallow import Schema, fields, validate, ValidationError
@@ -174,7 +174,12 @@ api.add_resource(Logout, "/logout")
 
 @app.route("/")
 def index():
-    return "<h1>Film Club Server</h1>"
+    return render_template("index.html")
+
+
+@app.errorhandler(404)
+def not_found(e):
+    return render_template("index.html")
 
 
 class Movies(Resource):
