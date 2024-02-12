@@ -16,7 +16,9 @@ class MovieSchema(ma.SQLAlchemySchema):
     release_date = ma.auto_field()
     poster_image = ma.auto_field()
     popularity = ma.auto_field()
-    genres = fields.Nested("GenreSchema", many=True, only=("name",))
+    genres = fields.Nested(
+        "GenreSchema", many=True, only=("name",), cascade="all,delete-orphan"
+    )
     screening_rooms = fields.Nested(
         "ScreeningRoomSchema", many=True, only=("id", "club")
     )
@@ -42,14 +44,10 @@ class UserSchema(ma.SQLAlchemySchema):
     bio = ma.auto_field()
     clubs = fields.Nested("ClubSchema", many=True)
     posts = fields.Nested(
-        "PostSchema",
-        many=True,
-        exclude=("author",),
+        "PostSchema", many=True, exclude=("author",), cascade="all,delete-orphan"
     )
     ratings = fields.Nested(
-        "RatingSchema",
-        many=True,
-        exclude=("author",),
+        "RatingSchema", many=True, exclude=("author",), cascade="all,delete-orphan"
     )
     role = fields.Nested(
         "RoleSchema",
@@ -75,7 +73,10 @@ class ClubSchema(ma.SQLAlchemySchema):
     name = ma.auto_field()
     description = ma.auto_field()
     screening_rooms = fields.Nested(
-        "ScreeningRoomSchema", many=True, only=("id", "movie")
+        "ScreeningRoomSchema",
+        many=True,
+        only=("id", "movie"),
+        cascade="all,delete-orphan",
     )
     members = fields.Nested(
         "UserSchema",
@@ -98,14 +99,8 @@ class ScreeningRoomSchema(ma.SQLAlchemySchema):
     movie_id = ma.auto_field()
     club = fields.Nested("ClubSchema", only=("id", "name"))
     movie = fields.Nested("MovieSchema", only=("id", "title", "poster_image"))
-    posts = fields.Nested(
-        "PostSchema",
-        many=True,
-    )
-    ratings = fields.Nested(
-        "RatingSchema",
-        many=True,
-    )
+    posts = fields.Nested("PostSchema", many=True, cascade="all,delete-orphan")
+    ratings = fields.Nested("RatingSchema", many=True, cascade="all,delete-orphan")
 
 
 class PostSchema(ma.SQLAlchemySchema):

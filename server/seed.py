@@ -10,15 +10,15 @@ TMDB_API_KEY = "97bca4f9bdb5d0ab61dcd0519c4eec58"
 
 with app.app_context():
     # Delete existing data
-    print("Deleting existing data...")
+    # print("Deleting existing data...")
     # User.query.delete()
     # Role.query.delete()
-    Movie.query.delete()
-    Genre.query.delete()
-    Club.query.delete()
-    ScreeningRoom.query.delete()
-    Post.query.delete()
-    Rating.query.delete()
+    # Movie.query.delete()
+    # Genre.query.delete()
+    # Club.query.delete()
+    # ScreeningRoom.query.delete()
+    # Post.query.delete()
+    # Rating.query.delete()
 
     print("Seeding movie data...")
 

@@ -1,8 +1,8 @@
-"""update models
+"""update tables
 
-Revision ID: 1ff7491153ad
+Revision ID: 00acedc4be88
 Revises: 
-Create Date: 2024-02-06 13:57:39.213787
+Create Date: 2024-02-12 11:42:44.623028
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '1ff7491153ad'
+revision = '00acedc4be88'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -22,7 +22,12 @@ def upgrade():
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(), nullable=False),
     sa.Column('description', sa.String(), nullable=True),
-    sa.Column('public', sa.Boolean(), nullable=True),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('name')
+    )
+    op.create_table('genres',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('name', sa.String(), nullable=False),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('name')
     )
@@ -31,12 +36,7 @@ def upgrade():
     sa.Column('title', sa.String(), nullable=False),
     sa.Column('release_date', sa.String(), nullable=True),
     sa.Column('poster_image', sa.String(), nullable=True),
-    sa.Column('genres', sa.String(), nullable=True),
-    sa.Column('director', sa.String(), nullable=True),
-    sa.Column('cast', sa.String(), nullable=True),
-    sa.Column('summary', sa.String(), nullable=True),
-    sa.Column('trailer_link', sa.String(), nullable=True),
-    sa.Column('streaming_availability', sa.String(), nullable=True),
+    sa.Column('popularity', sa.Integer(), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('roles',
@@ -45,9 +45,15 @@ def upgrade():
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('name')
     )
+    op.create_table('movie_genre',
+    sa.Column('movie_id', sa.Integer(), nullable=False),
+    sa.Column('genre_id', sa.Integer(), nullable=False),
+    sa.ForeignKeyConstraint(['genre_id'], ['genres.id'], ),
+    sa.ForeignKeyConstraint(['movie_id'], ['movies.id'], ),
+    sa.PrimaryKeyConstraint('movie_id', 'genre_id')
+    )
     op.create_table('screening_rooms',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('name', sa.String(), nullable=True),
     sa.Column('club_id', sa.Integer(), nullable=True),
     sa.Column('movie_id', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['club_id'], ['clubs.id'], ),
@@ -102,7 +108,9 @@ def downgrade():
     op.drop_table('club_members')
     op.drop_table('users')
     op.drop_table('screening_rooms')
+    op.drop_table('movie_genre')
     op.drop_table('roles')
     op.drop_table('movies')
+    op.drop_table('genres')
     op.drop_table('clubs')
     # ### end Alembic commands ###

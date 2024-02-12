@@ -22,6 +22,8 @@ flask-bcrypt = "*"
 flask-jwt-extended = "*"
 flask-user = "==1.0.2.2"
 sqlalchemy = "*"
+gunicorn = "*"
+psycopg2 = "*"
 
 [requires]
 python_full_version = "3.8.13"
