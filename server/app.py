@@ -239,6 +239,24 @@ class MoviesById(Resource):
         return {"message": "Movie deleted successfully"}, 200
 
 
+class GenresById(Resource):
+    def get(self, id):
+        genre = Genre.query.filter_by(id=id).first()
+        if genre is None:
+            return make_response({"error": "Genre not found"}, 404)
+        genre_schema = GenreSchema()
+        genre_data = genre_schema.dump(genre)
+        return make_response(jsonify(genre_data), 200)
+
+    def delete(self, id):
+        genre = Genre.query.get(id)
+        if not genre:
+            return make_response({"error": "Genre not found"}, 404)
+        db.session.delete(genre)
+        db.session.commit()
+        return {"message": "Genre deleted successfully"}, 200
+
+
 class Users(Resource):
     @admin_required
     def get(self):
@@ -665,6 +683,7 @@ class RatingsById(Resource):
 
 api.add_resource(Movies, "/movies")
 api.add_resource(MoviesById, "/movies/<int:id>")
+api.add_resource(GenresById, "/genres/<int:id>")
 api.add_resource(Users, "/users")
 api.add_resource(UsersById, "/users/<int:id>")
 api.add_resource(Roles, "/roles")

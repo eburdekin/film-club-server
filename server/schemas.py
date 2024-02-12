@@ -20,7 +20,10 @@ class MovieSchema(ma.SQLAlchemySchema):
         "GenreSchema", many=True, only=("name",), cascade="all,delete-orphan"
     )
     screening_rooms = fields.Nested(
-        "ScreeningRoomSchema", many=True, only=("id", "club")
+        "ScreeningRoomSchema",
+        many=True,
+        only=("id", "club"),
+        cascade="all,delete-orphan",
     )
 
 

@@ -13,17 +13,17 @@ with app.app_context():
     # print("Deleting existing data...")
     # User.query.delete()
     # Role.query.delete()
-    # Movie.query.delete()
-    # Genre.query.delete()
-    # Club.query.delete()
-    # ScreeningRoom.query.delete()
-    # Post.query.delete()
-    # Rating.query.delete()
+    Movie.query.delete()
+    Genre.query.delete()
+    Club.query.delete()
+    ScreeningRoom.query.delete()
+    Post.query.delete()
+    Rating.query.delete()
 
     print("Seeding movie data...")
 
     page = 1
-    total_pages = min(25, float("inf"))  # Set the total_pages to a maximum of 500
+    total_pages = min(10, float("inf"))  # Set the total_pages to a maximum of 500
 
     while page <= total_pages:
         url = f"https://api.themoviedb.org/3/discover/movie"
@@ -40,7 +40,7 @@ with app.app_context():
         if response.status_code == 200:
             data = response.json()
             total_pages = min(
-                data.get("total_pages", 0), 25
+                data.get("total_pages", 0), 10
             )  # Update total_pages with a maximum of 500
 
             # Extract and insert movie data into the database
