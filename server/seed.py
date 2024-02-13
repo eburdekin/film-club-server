@@ -7,6 +7,7 @@ from models import User, Role, Movie, Genre, Club, ScreeningRoom, Post, Rating
 import requests
 
 from faker import Faker
+import random
 from random import randint
 
 
@@ -15,16 +16,51 @@ TMDB_API_KEY = "97bca4f9bdb5d0ab61dcd0519c4eec58"
 fake = Faker()
 
 with app.app_context():
-    # Delete existing data
     # print("Deleting existing data...")
     # User.query.delete()
     # Role.query.delete()
-    Movie.query.delete()
-    Genre.query.delete()
-    Club.query.delete()
-    ScreeningRoom.query.delete()
-    Post.query.delete()
-    Rating.query.delete()
+    # Movie.query.delete()
+    # Genre.query.delete()
+    # Club.query.delete()
+    # ScreeningRoom.query.delete()
+    # Post.query.delete()
+    # Rating.query.delete()
+
+    print("Seeding users...")
+    # Define a list to store user details for signup
+    users_to_signup = []
+
+    # Generate user details using Faker and append to the list
+    for _ in range(15):
+        username = fake.user_name()
+        email = fake.email()
+        # Set password the same as username
+        password = username
+        users_to_signup.append(
+            {"username": username, "email": email, "password": password}
+        )
+
+    # Iterate over each user details and simulate signup
+    for user_details in users_to_signup:
+        # Extract user details
+        username = user_details["username"]
+        email = user_details["email"]
+        password = user_details["password"]
+
+        # Check if the username or email already exists
+        if User.query.filter_by(username=username).first() is not None:
+            print(f"Username '{username}' already exists, skipping signup.")
+            continue
+        if User.query.filter_by(email=email).first() is not None:
+            print(f"Email '{email}' already exists, skipping signup.")
+            continue
+
+        # Create a new user object
+        new_user = User(username=username, email=email)
+        new_user.password_hash = password  # Set password using hashing method
+
+        # Add the new user to the database
+        db.session.add(new_user)
 
     print("Seeding genres...")
     genre1 = Genre(id=28, name="Action")
@@ -100,8 +136,8 @@ with app.app_context():
                 genre_ids = movie_data.get("genre_ids", [])
                 genres = Genre.query.filter(Genre.id.in_(genre_ids)).all()
 
-                for genre in genres:
-                    print(genre)
+                # for genre in genres:
+                #     print(genre)
 
                 movie = Movie(
                     title=movie_data.get("title"),
@@ -121,14 +157,14 @@ with app.app_context():
             print(f"Failed to retrieve data from page {page}")
             break
 
-    # print("Seeding user roles...")
-    # role1 = Role(name="user")
-    # role2 = Role(name="mod")
-    # role3 = Role(name="admin")
+    print("Seeding user roles...")
+    role1 = Role(name="user")
+    role2 = Role(name="mod")
+    role3 = Role(name="admin")
 
-    # roles = [role1, role2, role3]
+    roles = [role1, role2, role3]
 
-    # db.session.add_all(roles)
+    db.session.add_all(roles)
 
     print("Seeding film club data...")
     club1 = Club(
@@ -223,6 +259,24 @@ with app.app_context():
     ]
 
     db.session.add_all(clubs)
+
+    print("Seeding club membership...")
+    # Define a list of users (assuming you have users in your database)
+    users = User.query.all()
+
+    # Shuffle the list of users to randomize the order
+    random.shuffle(users)
+
+    # Assign a random subset of users to each club
+    for club in clubs:
+        # Determine the number of members for each club (you can adjust this number as needed)
+        num_members = random.randint(5, 15)  # Random number between 5 and 15
+
+        # Select a random subset of users to be members of the club
+        club_members = random.sample(users, num_members)
+
+        # Add the selected users to the club's members
+        club.members.extend(club_members)
 
     print("Seeding screening room data...")
     screening_room1 = ScreeningRoom(club_id=1, movie_id=1)

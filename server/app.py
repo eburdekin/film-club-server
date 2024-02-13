@@ -216,7 +216,7 @@ class SimilarMoviesByGenre(Resource):
             return make_response(jsonify({"error": "Movie has no genres"}), 404)
 
         # Get other movies with the same genre(s)
-        filters = [Movie.genres.any(id=genre.id) for genre in movie_genres[:3]]
+        filters = [Movie.genres.any(id=genre.id) for genre in movie_genres[:2]]
         similar_movies = (
             Movie.query.filter(and_(*filters), not_(Movie.id == movie_id))
             .limit(6)
