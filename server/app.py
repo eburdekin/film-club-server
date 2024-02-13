@@ -4,7 +4,7 @@ from flask import request, session, make_response, jsonify, render_template
 from flask_restful import Resource
 from functools import wraps
 from marshmallow import Schema, fields, validate, ValidationError
-from sqlalchemy import and_, not_
+from sqlalchemy import or_, and_, not_
 
 # Local imports
 from models import db, Movie, Role, User, Club, ScreeningRoom, Post, Rating
@@ -218,9 +218,7 @@ class SimilarMoviesByGenre(Resource):
         # Get other movies with the same genre(s)
         filters = [Movie.genres.any(id=genre.id) for genre in movie_genres]
         similar_movies = (
-            Movie.query.filter(and_(*filters), not_(Movie.id == movie_id))
-            .limit(6)
-            .all()
+            Movie.query.filter(or_(*filters), not_(Movie.id == movie_id)).limit(6).all()
         )
 
         # Serialize the data
