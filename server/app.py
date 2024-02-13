@@ -1,7 +1,7 @@
 # #!/usr/bin/env python3
 
 from flask import request, session, make_response, jsonify, render_template
-from flask_restful import Resource
+from flask_restful import Resource, reqparse
 from functools import wraps
 from marshmallow import Schema, fields, validate, ValidationError
 from sqlalchemy import or_, and_, not_
@@ -184,8 +184,27 @@ def not_found(e):
 
 
 class Movies(Resource):
+    # def get(self):
+    #     movies = Movie.query.all()
+    #     movie_schema = MovieSchema(many=True)
+    #     movies_data = movie_schema.dump(movies)
+    #     return make_response(jsonify(movies_data), 200)
+    def __init__(self):
+        self.reqparse = reqparse.RequestParser()
+        self.reqparse.add_argument(
+            "q", type=str, help="Search term for movies", location="args"
+        )
+        super(Movies, self).__init__()
+
     def get(self):
-        movies = Movie.query.all()
+        args = self.reqparse.parse_args()
+        search_term = args.get("q", None)
+
+        if search_term:
+            movies = Movie.query.filter(Movie.title.ilike(f"%{search_term}%")).all()
+        else:
+            movies = Movie.query.all()
+
         movie_schema = MovieSchema(many=True)
         movies_data = movie_schema.dump(movies)
         return make_response(jsonify(movies_data), 200)
