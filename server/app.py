@@ -510,6 +510,11 @@ class AddRoomToClub(Resource):
         if not club:
             return make_response({"error": "Club not found"}, 404)
 
+        movie_id = validated_data.get("movie_id")
+        movie = Movie.query.get(movie_id)
+        if movie is None:
+            return jsonify({"error": "Movie not found"}), 404
+
         screening_room_schema = ScreeningRoomSchema()
         try:
             new_screening_room = ScreeningRoom(
@@ -561,6 +566,20 @@ class ScreeningRoomsById(Resource):
         db.session.delete(room)
         db.session.commit()
         return {"message": "Screening room deleted successfully"}, 200
+
+
+class UserPosts(Resource):
+    def get(self, user_id):
+        # Fetch posts associated with the given user_id
+        posts = Post.query.filter_by(author_id=user_id).all()
+        # Serialize the posts using PostSchema
+        post_schema = PostSchema(many=True)
+        posts_data = post_schema.dump(posts)
+        # Return the serialized posts data
+        return make_response(jsonify(posts_data), 200)
+
+
+api.add_resource(UserPosts, "/users/<int:user_id>/posts")
 
 
 class Posts(Resource):

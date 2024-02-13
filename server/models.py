@@ -1,5 +1,6 @@
 from sqlalchemy.ext.hybrid import hybrid_property
 from config import db, bcrypt
+import pytz
 
 club_members = db.Table(
     "club_members",
@@ -178,8 +179,6 @@ class Post(db.Model):
     screening_room_id = db.Column(db.Integer, db.ForeignKey("screening_rooms.id"))
     timestamp = db.Column(db.DateTime, default=db.func.now())
 
-    # serialize_only = ("content", "timestamp")
-
     def __init__(self, content, author_id, screening_room_id):
         self.content = content
         self.author_id = author_id
@@ -187,6 +186,10 @@ class Post(db.Model):
 
     def __repr__(self):
         return f"<Post id # {self.id}>"
+
+    # @property
+    # def timestamp_pst(self):
+    #     return self.timestamp.astimezone(pst).strftime("%Y-%m-%d %H:%M:%S %Z")
 
 
 class Rating(db.Model):
@@ -205,3 +208,7 @@ class Rating(db.Model):
 
     def __repr__(self):
         return f"<Rating id # {self.id}>"
+
+    # @property
+    # def timestamp_pst(self):
+    #     return self.timestamp.astimezone(pst).strftime("%Y-%m-%d %H:%M:%S %Z")
