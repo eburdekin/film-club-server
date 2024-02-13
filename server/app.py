@@ -203,6 +203,15 @@ class Movies(Resource):
             return make_response({"error": e.__str__()}, 400)
 
 
+class AvgRatingByMovieId(Resource):
+    def get(self, movie_id):
+        average_rating = Movie.calculate_average_rating(movie_id)
+        return {"movie_id": movie_id, "average_rating": average_rating}
+
+
+api.add_resource(AvgRatingByMovieId, "/movies/<int:movie_id>/average-rating")
+
+
 class MoviesById(Resource):
     def get(self, id):
         movie = Movie.query.filter_by(id=id).first()

@@ -49,6 +49,29 @@ class Movie(db.Model):
     def __repr__(self):
         return f"<Movie {self.title}, id # {self.id}>"
 
+    @staticmethod
+    def calculate_average_rating(movie_id):
+        # Retrieve all screening rooms associated with the given movie
+        screening_rooms = ScreeningRoom.query.filter_by(movie_id=movie_id).all()
+
+        total_ratings = 0
+        total_count = 0
+
+        # Calculate the total ratings for the movie
+        for room in screening_rooms:
+            ratings = Rating.query.filter_by(screening_room_id=room.id).all()
+            for rating in ratings:
+                total_ratings += rating.rating
+                total_count += 1
+
+        # Calculate the average rating
+        if total_count > 0:
+            average_rating = total_ratings / total_count
+        else:
+            average_rating = 0
+
+        return average_rating
+
 
 class Genre(db.Model):
     __tablename__ = "genres"
