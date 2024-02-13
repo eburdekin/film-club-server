@@ -4,6 +4,7 @@ from flask import request, session, make_response, jsonify, render_template
 from flask_restful import Resource
 from functools import wraps
 from marshmallow import Schema, fields, validate, ValidationError
+from sqlalchemy import and_
 
 # Local imports
 from models import db, Movie, Role, User, Club, ScreeningRoom, Post, Rating
@@ -201,6 +202,31 @@ class Movies(Resource):
         except Exception as e:
             db.session.rollback()
             return make_response({"error": e.__str__()}, 400)
+
+
+class SimilarMoviesByGenre(Resource):
+    def get(self, movie_id):
+        movie = Movie.query.get(movie_id)
+        if not movie:
+            return make_response(jsonify({"error": "Movie not found"}), 404)
+
+        # Get the genres of the movie
+        movie_genres = movie.genres
+        if not movie_genres:
+            return make_response(jsonify({"error": "Movie has no genres"}), 404)
+
+        # Get other movies with the same genre(s)
+        filters = [Movie.genres.any(id=genre.id) for genre in movie_genres]
+        similar_movies = Movie.query.filter(and_(*filters)).limit(5).all()
+
+        # Serialize the data
+        movie_schema = MovieSchema(many=True)
+        similar_movies_data = movie_schema.dump(similar_movies)
+
+        return similar_movies_data, 200
+
+
+api.add_resource(SimilarMoviesByGenre, "/movies/<int:movie_id>/similar")
 
 
 class AvgRatingByMovieId(Resource):
