@@ -72,6 +72,21 @@ class Movie(db.Model):
 
         return average_rating
 
+    @staticmethod
+    def get_posts_for_movie(movie_id):
+        # Find the screening rooms associated with the given movie
+        screening_rooms = ScreeningRoom.query.filter_by(movie_id=movie_id).all()
+
+        # Initialize a list to store all posts
+        all_posts = []
+
+        # Retrieve all posts associated with each screening room
+        for room in screening_rooms:
+            posts = Post.query.filter_by(screening_room_id=room.id).all()
+            all_posts.extend(posts)
+
+        return all_posts
+
 
 class Genre(db.Model):
     __tablename__ = "genres"

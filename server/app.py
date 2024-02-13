@@ -212,6 +212,17 @@ class AvgRatingByMovieId(Resource):
 api.add_resource(AvgRatingByMovieId, "/movies/<int:movie_id>/average-rating")
 
 
+class PostsByMovieId(Resource):
+    def get(self, movie_id):
+        posts = Movie.get_posts_for_movie(movie_id)
+        post_schema = PostSchema(many=True)
+        posts_data = post_schema.dump(posts)
+        return {"movie_id": movie_id, "posts": posts_data}
+
+
+api.add_resource(PostsByMovieId, "/movies/<int:movie_id>/posts")
+
+
 class MoviesById(Resource):
     def get(self, id):
         movie = Movie.query.filter_by(id=id).first()
