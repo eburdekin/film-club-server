@@ -45,6 +45,7 @@ class UserSchema(ma.SQLAlchemySchema):
     username = ma.auto_field()
     email = ma.auto_field()
     bio = ma.auto_field()
+    location = ma.auto_field()
     clubs = fields.Nested("ClubSchema", many=True)
     posts = fields.Nested(
         "PostSchema", many=True, exclude=("author",), cascade="all,delete-orphan"

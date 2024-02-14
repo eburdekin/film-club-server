@@ -170,6 +170,52 @@ api.add_resource(LoginResource, "/login")
 api.add_resource(CheckSession, "/check_session")
 api.add_resource(Logout, "/logout")
 
+
+class ChangeEmail(Resource):
+    def post(self):
+        user_id = session.get("user_id")
+        if not user_id:
+            return {"msg": "User not authenticated"}, 401
+
+        request_json = request.get_json()
+        new_email = request_json.get("email")
+
+        user = User.query.get(user_id)
+        if not user:
+            return {"msg": "User not found"}, 404
+
+        user.email = new_email
+        db.session.commit()
+
+        return {"msg": "Email changed successfully"}, 200
+
+
+# class ChangePassword(Resource):
+#     def post(self):
+#         user_id = session.get("user_id")
+#         if not user_id:
+#             return {"msg": "User not authenticated"}, 401
+
+#         request_json = request.get_json()
+#         current_password = request_json.get("current_password")
+#         new_password = request_json.get("new_password")
+
+#         user = User.query.get(user_id)
+#         if not user:
+#             return {"msg": "User not found"}, 404
+
+#         if not user.authenticate(current_password):
+#             return {"msg": "Incorrect current password"}, 400
+
+#         user.password_hash = new_password
+#         db.session.commit()
+
+#         return {"msg": "Password changed successfully"}, 200
+
+
+api.add_resource(ChangeEmail, "/update-email")
+# api.add_resource(ChangePassword, "/update-password")
+
 # API Routes
 
 
@@ -358,20 +404,20 @@ class UsersById(Resource):
         user_data = user_schema.dump(user)
         return make_response(jsonify(user_data), 200)
 
-    # def patch(self, id):
-    #     # need to be changed for roles?
-    #     user = User.query.get(id)
-    #     if not user:
-    #         return make_response({"error": "User not found"}, 404)
-    #     data = request.json
-    #     user_schema = UserSchema()
-    #     try:
-    #         updated_user = user_schema.load(data, instance=user, partial=True)
-    #         db.session.commit()
-    #         return user_schema.dump(updated_user), 200
-    #     except Exception as e:
-    #         db.session.rollback()
-    #         return make_response({"error": e.__str__()}, 400)
+    def patch(self, id):
+        # need to be changed for roles?
+        user = User.query.get(id)
+        if not user:
+            return make_response({"error": "User not found"}, 404)
+        data = request.json
+        user_schema = UserSchema()
+        try:
+            updated_user = user_schema.load(data, instance=user, partial=True)
+            db.session.commit()
+            return user_schema.dump(updated_user), 200
+        except Exception as e:
+            db.session.rollback()
+            return make_response({"error": e.__str__()}, 400)
 
     # @admin_required
     # def patch(self, id):

@@ -118,6 +118,7 @@ class User(db.Model):
     _password_hash = db.Column(db.String)
     profile_picture = db.Column(db.String)
     bio = db.Column(db.String)
+    location = db.Column(db.String)
 
     # Define relationship to posts and ratings
     posts = db.relationship("Post", backref="author", lazy="dynamic")
