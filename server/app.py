@@ -7,10 +7,11 @@ from marshmallow import Schema, fields, validate, ValidationError
 from sqlalchemy import or_, and_, not_
 
 # Local imports
-from models import db, Movie, Role, User, Club, ScreeningRoom, Post, Rating
+from models import db, Movie, Genre, Role, User, Club, ScreeningRoom, Post, Rating
 from schemas import (
     MovieSchema,
     UserSchema,
+    GenreSchema,
     RoleSchema,
     ClubSchema,
     ScreeningRoomSchema,
