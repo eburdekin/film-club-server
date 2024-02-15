@@ -206,7 +206,7 @@ class PostPostSchema(Schema):
         required=True,
         validate=validate.Length(
             min=1,
-            max=300,
+            max=200,
             error="Post content length must be between 1 and 200 characters",
         ),
         error_messages={"required": "Post content is required"},
