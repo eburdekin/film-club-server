@@ -8,12 +8,6 @@ club_members = db.Table(
     db.Column("club_id", db.Integer, db.ForeignKey("clubs.id"), primary_key=True),
 )
 
-# user_roles = db.Table(
-#     "user_roles",
-#     db.Column("user_id", db.Integer, db.ForeignKey("users.id"), primary_key=True),
-#     db.Column("role_id", db.Integer, db.ForeignKey("roles.id"), primary_key=True),
-# )
-
 movie_genre = db.Table(
     "movie_genre",
     db.Column("movie_id", db.Integer, db.ForeignKey("movies.id"), primary_key=True),
@@ -51,20 +45,18 @@ class Movie(db.Model):
 
     @staticmethod
     def calculate_average_rating(movie_id):
-        # Retrieve all screening rooms associated with the given movie
         screening_rooms = ScreeningRoom.query.filter_by(movie_id=movie_id).all()
 
         total_ratings = 0
         total_count = 0
 
-        # Calculate the total ratings for the movie
         for room in screening_rooms:
             ratings = Rating.query.filter_by(screening_room_id=room.id).all()
             for rating in ratings:
                 total_ratings += rating.rating
                 total_count += 1
 
-        # Calculate the average rating
+
         if total_count > 0:
             average_rating = total_ratings / total_count
         else:
@@ -74,13 +66,9 @@ class Movie(db.Model):
 
     @staticmethod
     def get_posts_for_movie(movie_id):
-        # Find the screening rooms associated with the given movie
         screening_rooms = ScreeningRoom.query.filter_by(movie_id=movie_id).all()
-
-        # Initialize a list to store all posts
         all_posts = []
 
-        # Retrieve all posts associated with each screening room
         for room in screening_rooms:
             posts = Post.query.filter_by(screening_room_id=room.id).all()
             all_posts.extend(posts)
@@ -120,7 +108,6 @@ class User(db.Model):
     bio = db.Column(db.String)
     location = db.Column(db.String)
 
-    # Define relationship to posts and ratings
     posts = db.relationship("Post", backref="author", lazy="dynamic")
 
     ratings = db.relationship("Rating", backref="user", lazy="dynamic")
@@ -128,13 +115,6 @@ class User(db.Model):
     role_id = db.Column(db.Integer, db.ForeignKey("roles.id"))
     role = db.relationship("Role", backref="user", uselist=False)
 
-    # Define relationship to clubs
-    # clubs = db.relationship(
-    #     "Club", secondary="club_members", backref=db.backref("members", lazy="dynamic")
-    # )
-    # clubs = db.relationship(
-    #     "Club", secondary=club_members, backref=db.backref("members", lazy="dynamic")
-    # )
 
     # Authentication
 
@@ -165,9 +145,7 @@ class Club(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, unique=True, nullable=False)
     description = db.Column(db.String)
-    # owner_id = db.Column(db.Integer, db.ForeignKey("users.id"))
 
-    # owner = db.relationship("User", backref="clubs_owned")
     members = db.relationship("User", secondary="club_members", backref="clubs")
 
     screening_rooms = db.relationship("ScreeningRoom", backref="club")
@@ -185,7 +163,7 @@ class ScreeningRoom(db.Model):
     __tablename__ = "screening_rooms"
 
     id = db.Column(db.Integer, primary_key=True)
-    # name = db.Column(db.String)
+
     club_id = db.Column(db.Integer, db.ForeignKey("clubs.id"))
     movie_id = db.Column(db.Integer, db.ForeignKey("movies.id"))
 
@@ -197,11 +175,9 @@ class ScreeningRoom(db.Model):
 
     def __init__(
         self,
-        # name,
         club_id,
         movie_id,
     ):
-        # self.name = name
         self.club_id = club_id
         self.movie_id = movie_id
 
