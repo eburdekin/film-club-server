@@ -182,15 +182,6 @@ class ClubPostSchema(Schema):
 
 
 class ScreeningRoomPostSchema(Schema):
-    # name = fields.String(
-    #     required=True,
-    #     validate=validate.Length(
-    #         min=1,
-    #         max=50,
-    #         error="Screening room name length must be between 1 and 50 characters",
-    #     ),
-    #     error_messages={"required": "Screening room name is required"},
-    # )
     club_id = fields.Integer(
         required=True,
         error_messages={"required": "Club ID is required"},
