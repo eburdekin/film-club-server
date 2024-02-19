@@ -26,6 +26,15 @@ with app.app_context():
     # Post.query.delete()
     # Rating.query.delete()
 
+    print("Seeding user roles...")
+    role1 = Role(name="user")
+    role2 = Role(name="mod")
+    role3 = Role(name="admin")
+
+    roles = [role1, role2, role3]
+
+    db.session.add_all(roles)
+
     print("Seeding users...")
     # Define a list to store user details for signup
     users_to_signup = []
@@ -156,15 +165,6 @@ with app.app_context():
         else:
             print(f"Failed to retrieve data from page {page}")
             break
-
-    print("Seeding user roles...")
-    role1 = Role(name="user")
-    role2 = Role(name="mod")
-    role3 = Role(name="admin")
-
-    roles = [role1, role2, role3]
-
-    db.session.add_all(roles)
 
     print("Seeding film club data...")
     club1 = Club(
