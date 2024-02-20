@@ -6,7 +6,7 @@
 
 ### Frontend
 
-![demo gif](/demo.gif)
+![demo gif](/images/demo.gif)
 
 - Fully-responsive React app with nested layouts and dark mode built with Tailwind CSS
 - Global user state management with React's useContext hook
@@ -14,7 +14,7 @@
 
 ### Backend
 
-![dbdiagram](/dbdiagram_updated.png)
+![dbdiagram](/images/dbdiagram_updated.png)
 
 - Flask app built with SQLAlchemy and Flask-Restful
 - Bcrypt for password hashing and user authentication
